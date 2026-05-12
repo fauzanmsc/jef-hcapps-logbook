@@ -98,37 +98,37 @@ body {
 }
 
 
-    body::before {
+
+/* layer animasi gradient */
+body::before {
   content: "";
   position: fixed;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
+  inset: 0;
   z-index: -1;
 
   background:
-    radial-gradient(circle at 30% 30%, rgba(245,196,81,0.18), transparent 35%),
-    radial-gradient(circle at 70% 70%, rgba(245,196,81,0.10), transparent 40%),
-    radial-gradient(circle at 20% 80%, rgba(245,196,81,0.08), transparent 30%);
+    radial-gradient(circle at 20% 20%, rgba(245,196,81,0.14), transparent 35%),
+    radial-gradient(circle at 80% 80%, rgba(245,196,81,0.10), transparent 40%),
+    radial-gradient(circle at 50% 100%, rgba(245,196,81,0.06), transparent 45%);
 
-  animation: bgMove 18s ease-in-out infinite alternate;
-  filter: blur(40px);
-  transform: translate3d(0,0,0);
+  animation: gradientMove 6s ease-in-out infinite alternate;
+  filter: blur(10px);
+  transform: scale(1.1);
 }
 
-
-    @keyframes bgMove {
+/* animasi movement */
+@keyframes gradientMove {
   0% {
-    transform: translate(-5%, -5%) scale(1);
+    transform: scale(1.1) translate(0px, 0px);
   }
   50% {
-    transform: translate(5%, 3%) scale(1.1);
+    transform: scale(1.15) translate(-10px, 10px);
   }
   100% {
-    transform: translate(-3%, 6%) scale(1.05);
+    transform: scale(1.1) translate(10px, -10px);
   }
 }
+    
     abel.small.fw-semibold.mb-2 {
     font-size: 12px!important;
 }
