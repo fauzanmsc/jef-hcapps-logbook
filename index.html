@@ -105,6 +105,15 @@ body {
   animation: fadeIn 0.4s ease;
 }
 
+
+    #pageMenu.active {
+  min-height: calc(100vh - 80px);
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+    
     #pageReport.active {
   justify-content: center;
   align-items: center;
@@ -191,6 +200,22 @@ body {
   .btn-success:hover {
     transform: translateY(-2px);
   }
+.menu-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#pageMenu .row {
+  max-width: 320px;
+}
+
+#pageMenu h5,
+#pageMenu h4 {
+  text-align: center;
+}
 
   .menu-item {
     background: linear-gradient(145deg, #a87e00, #ffdcb0);
@@ -453,11 +478,12 @@ select:-webkit-autofill {
   </div>
 
   <div id="pageMenu" class="page">
+      <div class="menu-wrapper">
     <div class="mb-4 text-center">
       <h5 class="fw-bold">Selamat Datang,</h5>
       <h4 class="text-primary fw-bold" id="userLabel">User</h4>
     </div>
-    <div class="row g-3">
+    <div class="row g-3 justify-content-center w-100">
       <div class="col-6">
         <div class="menu-item shadow-sm" onclick="showPlan()">
           <span class="menu-icon">✍️</span>
@@ -474,6 +500,7 @@ select:-webkit-autofill {
     <div class="text-center mt-5">
       <button class="btn btn-link text-danger text-decoration-none small" onclick="location.reload()">Keluar</button>
     </div>
+  </div>
   </div>
 
   <div id="pagePlan" class="page">
