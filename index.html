@@ -409,9 +409,11 @@ select:-webkit-autofill {
       </div>
       
 <div id="planContainer">
-  <div class="row g-2 mb-2">
+
+  <!-- Default Field (Tidak bisa dihapus) -->
+  <div class="row g-2 mb-2 task-row">
     
-    <div class="col-6">
+    <div class="col-5">
       <input 
         type="text" 
         class="form-control tn shadow-sm" 
@@ -419,7 +421,7 @@ select:-webkit-autofill {
       >
     </div>
 
-    <div class="col-6">
+    <div class="col-5">
       <input 
         type="text" 
         class="form-control tt shadow-sm" 
@@ -427,7 +429,18 @@ select:-webkit-autofill {
       >
     </div>
 
+    <div class="col-2">
+      <button 
+        type="button"
+        class="btn btn-dark w-100 h-100"
+        disabled
+      >
+        <i class="bi bi-dash-lg"></i>
+      </button>
+    </div>
+
   </div>
+
 </div>
       
       <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Tambahkan Task</button>
@@ -519,9 +532,9 @@ select:-webkit-autofill {
 
 function addPlanField() {
   const html = `
-    <div class="row g-2 mb-2 animate__animated animate__fadeInUp">
+    <div class="row g-2 mb-2 task-row animate__animated animate__fadeInUp">
       
-      <div class="col-6">
+      <div class="col-5">
         <input 
           type="text" 
           class="form-control tn shadow-sm" 
@@ -529,7 +542,7 @@ function addPlanField() {
         >
       </div>
 
-      <div class="col-6">
+      <div class="col-5">
         <input 
           type="text" 
           class="form-control tt shadow-sm" 
@@ -537,10 +550,21 @@ function addPlanField() {
         >
       </div>
 
+      <div class="col-2">
+        <button 
+          type="button"
+          class="btn btn-outline-danger w-100 h-100"
+          onclick="removeTask(this)"
+        >
+          <i class="bi bi-trash3-fill"></i>
+        </button>
+      </div>
+
     </div>
   `;
 
-  document.getElementById('planContainer')
+  document
+    .getElementById('planContainer')
     .insertAdjacentHTML('beforeend', html);
 }
 
@@ -638,6 +662,22 @@ function updateDateTime() {
 
 updateDateTime();
 setInterval(updateDateTime, 1000);
+
+function removeTask(button) {
+  const totalTask = document.querySelectorAll('.task-row').length;
+
+  // Minimal 1 field tersisa
+  if (totalTask <= 1) {
+    Swal.fire(
+      'Oops!',
+      'Minimal harus ada 1 task.',
+      'warning'
+    );
+    return;
+  }
+
+  button.closest('.task-row').remove();
+}
   
 </script>
 
