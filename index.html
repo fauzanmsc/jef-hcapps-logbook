@@ -481,7 +481,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwc_p0rEflhgIvCoQilowZtZ-YFeCBLIYfg5xoZBypQ7mrSocNWuBrzBYS1BmYA6huZuw/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz-KS2KW3hoDIQSRR1pxB3c5iLWkIJfAj6DqeVUIaiybunRL6wbD54DPj3cs2oX9ir14A/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -587,147 +587,26 @@ function addPlanField() {
   }
 
   async function showReport() {
-
-  loader('Sedang menyinkronkan data...');
-
-  try {
-
-    const tasks = await callAPI({
-      action: 'getActiveTasks',
-      username: user
-    });
-
+    loader('Syncing Tasks...');
+    const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
-
-    // Validasi response
-    if (!Array.isArray(tasks) || tasks.length === 0) {
-      return Swal.fire(
-        'Info',
-        'Tidak ada task aktif untuk hari ini.',
-        'info'
-      );
-    }
-
+    if(tasks.length === 0) return Swal.fire('Info', 'No active plan for today.', 'info');
     let h = '';
-
     tasks.forEach(t => {
-
-      h += `
-        <div 
-          class="bento-card mb-3 bg-light"
-          data-row="${t.row}"
-          style="padding:15px; border-radius:16px;"
-        >
-
-          <div class="mb-2">
-
-            <div class="fw-bold text-primary small mb-1">
-              TASK
-            </div>
-
-            <div class="text-white fw-semibold">
-              ${t.task || '-'}
-            </div>
-
-          </div>
-
-          <div class="mb-3">
-
-            <div class="fw-bold text-primary small mb-1">
-              TARGET
-            </div>
-
-            <div class="text-muted small">
-              ${t.target || '-'}
-            </div>
-
-          </div>
-
-          <div class="row g-2">
-
-            <div class="col-6">
-              <label class="small text-muted mb-1">
-                Start Time
-              </label>
-              <input 
-                type="time"
-                class="form-control form-control-sm r-start"
-              >
-            </div>
-
-            <div class="col-6">
-              <label class="small text-muted mb-1">
-                End Time
-              </label>
-              <input 
-                type="time"
-                class="form-control form-control-sm r-end"
-              >
-            </div>
-
-            <div class="col-12">
-              <label class="small text-muted mb-1">
-                Output Result
-              </label>
-              <input 
-                type="text"
-                class="form-control form-control-sm r-out"
-                placeholder="Tulis hasil pekerjaan..."
-              >
-            </div>
-
-            <div class="col-12">
-              <label class="small text-muted mb-1">
-                Issue / Kendala
-              </label>
-              <input 
-                type="text"
-                class="form-control form-control-sm r-iss"
-                placeholder="Tulis kendala..."
-              >
-            </div>
-
-            <div class="col-12 mt-2">
-              <div class="form-check form-switch">
-
-                <input 
-                  class="form-check-input r-c"
-                  type="checkbox"
-                >
-
-                <label class="small fw-bold">
-                  Task Selesai
-                </label>
-
-              </div>
-            </div>
-
-          </div>
-
+      h += `<div class="bento-card mb-3 bg-light" data-row="${t.row}" style="padding: 15px; border-radius: 16px;">
+        <p class="mb-2 fw-bold text-dark small">${t.task}</p>
+        <div class="row g-2">
+          <div class="col-6"><input type="time" class="form-control form-control-sm r-start"></div>
+          <div class="col-6"><input type="time" class="form-control form-control-sm r-end"></div>
+          <div class="col-12"><input type="text" class="form-control form-control-sm r-out" placeholder="Output Result"></div>
+          <div class="col-12"><input type="text" class="form-control form-control-sm r-iss" placeholder="Issue/Kendala"></div>
+          <div class="col-12"><div class="form-check form-switch"><input class="form-check-input r-c" type="checkbox"> <label class="small fw-bold">Done</label></div></div>
         </div>
-      `;
-
+      </div>`;
     });
-
     document.getElementById('reportContainer').innerHTML = h;
-
     nav('pageReport');
-
-  } catch (err) {
-
-    Swal.close();
-
-    console.error(err);
-
-    Swal.fire(
-      'Error',
-      'Gagal memuat data task.',
-      'error'
-    );
-
   }
-
-}
 
   async function finalReport() {
     let reports = [];
