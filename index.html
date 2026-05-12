@@ -327,6 +327,11 @@ body {
   position: relative;
 }
 
+    button.btn.btn-outline-secondary.btn-sm.d-inline-flex.align-items-center.gap-2 {
+    padding: 5px 20px;
+    border-radius: 10px;
+}
+
 .toggle-password {
   position: absolute;
   top: 50%;
@@ -490,7 +495,14 @@ select:-webkit-autofill {
   <div id="pageMenu" class="page">
       <div class="menu-wrapper">
     <div class="mb-4 text-center">
-      <h5 class="fw-bold">Selamat Datang,</h5>
+        <!-- Profile Image -->
+  <img src="https://ui-avatars.com/api/?name=User&background=0D6EFD&color=fff"
+       class="rounded-circle my-3"
+       width="80"
+       height="80"
+       alt="User Profile">
+      
+      <h5 class="fw-light">Hai, Selamat Datang 👋</h5>
       <h4 class="text-primary fw-bold" id="userLabel">User</h4>
     </div>
     <div class="row g-3 justify-content-center w-100">
@@ -509,7 +521,7 @@ select:-webkit-autofill {
     </div>
     <div class="text-center mt-5">
      
-<button class="btn btn-outline-danger btn-sm d-inline-flex align-items-center gap-2"
+<button class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
         onclick="confirmExit()">
   <i class="bi bi-box-arrow-right"></i>
   Keluar
