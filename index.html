@@ -759,7 +759,7 @@ async function showReport() {
     if (!tasks || tasks.length === 0) {
       return Swal.fire({
         title: 'Tugas Tidak Ditemukan',
-        text: `Tidak ada tugas untuk "${user}" pada tanggal hari ini yang statusnya (Kolom M) masih kosong.`,
+        text: `Tidak ada tugas aktif saat ini.`,
         icon: 'info'
       });
     }
