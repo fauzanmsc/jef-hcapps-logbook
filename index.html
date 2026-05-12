@@ -861,14 +861,17 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxYKeK6dj3reni3EOCQytRm8My0zF-Sj0mkoNVUnRRK2jZ5ZBf8suLKOLr4pH50tlOinQ/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXloA4suXfFAke7Su3b0Zj4rCc2bhEcaxKUi0dWRIl9mYiWIDQPg3bEj9vVRBMKMH6iw/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
   async function callAPI(payload) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000); // 15 detik
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    // 🔥 DEBUG REQUEST (TARUH DI SINI)
+    console.log("📤 REQUEST KE SERVER:", payload);
 
     const response = await fetch(WEB_APP_URL, {
       method: 'POST',
@@ -878,17 +881,26 @@ select:-webkit-autofill {
 
     clearTimeout(timeout);
 
-    const text = await response.text(); // jangan langsung JSON
+    const text = await response.text();
 
+    // 🔥 DEBUG RAW RESPONSE (TARUH DI SINI)
+    console.log("📥 RAW RESPONSE:", text);
+
+    let json;
     try {
-      return JSON.parse(text);
+      json = JSON.parse(text);
     } catch (e) {
-      console.error("Invalid JSON response:", text);
+      console.error("❌ JSON ERROR:", text);
       throw new Error("Server tidak mengirim JSON valid");
     }
 
+    // 🔥 DEBUG FINAL PARSED RESULT
+    console.log("✅ PARSED RESPONSE:", json);
+
+    return json;
+
   } catch (err) {
-    console.error(err);
+    console.error("❌ CALL API ERROR:", err);
     throw err;
   }
 }
@@ -1065,8 +1077,8 @@ async function showReport() {
           
               <!-- CHECKBOX KANAN -->
               <div class="form-check modern-check m-0">
-                <input class="form-check-input r-c" type="checkbox" id="check3">
-                <label class="form-check-label text-white small" for="check3">
+                <input class="form-check-input r-c" type="checkbox">
+                <label class="form-check-label text-white small">
                   Ya, Selesai
                 </label>
               </div>
@@ -1094,12 +1106,12 @@ async function showReport() {
 async function finalReport() {
 
   const fieldRules = {
-    startTime: true,
-    endTime: true,
-    output: true,
-    issue: false,
-    completed: true
-  };
+  startTime: true,
+  endTime: true,
+  output: true,
+  issue: false,
+  completed: false   // ❗ FIX INI
+};
 
   const isValid = (key, value) => {
     if (!fieldRules[key]) return true;
@@ -1139,24 +1151,31 @@ async function finalReport() {
     return Swal.fire('Oops!', 'Mohon lengkapi semua field wajib sebelum mengirim report.', 'warning');
   }
 
+  console.log("REPORT PAYLOAD FINAL:", reports);
+
   loader('Mengirim Report...');
 
-  try {
-    const res = await callAPI({
-      action: 'submitReport',
-      data: {
-        reports: JSON.stringify(reports),
-        note: document.getElementById('genNote').value
-      }
-    });
+try {
+  const res = await callAPI({
+    action: 'submitReport',
+    data: {
+      reports: reports,
+      note: document.getElementById('genNote').value
+    }
+  });
 
-    Swal.fire('Berhasil', res.message, 'success');
-    nav('pageMenu');
+  console.log(res);
 
-  } catch (err) {
-    Swal.fire('Error', 'Gagal mengirim report. Cek koneksi / server.', 'error');
-    console.error(err);
+  if (!res.success) {
+    throw new Error(res.message);
   }
+
+  Swal.fire('Berhasil', res.message, 'success');
+  nav('pageMenu');
+
+} catch (err) {
+  console.error(err);
+  Swal.fire('Error', err.message || 'Server gagal memproses request', 'error');
 }
   ///
 
