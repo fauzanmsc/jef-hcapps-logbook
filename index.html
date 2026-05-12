@@ -603,7 +603,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxBc_oDxxcFgW36ap3vlN0DfMAayTdH5_icUtbVsgmZjyk8ywf2L1xMHUG4ENQh3LFayA/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbylKDTQ7t7XrvppRmPZYlqLCZvEvLUjiFNsKIFP9mxbDklVdm_gCL0xVq4kO1mye8Yl7Q/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -633,7 +633,7 @@ select:-webkit-autofill {
     const res = await callAPI({ action: 'checkLogin', u, p });
     Swal.close();
     if(res.success) { 
-      user = res.name; 
+     user = res.username;
      /* document.getElementById('userLabel').innerText = user; *//
       document.getElementById('userLabel').innerText = p.fullName;
 
