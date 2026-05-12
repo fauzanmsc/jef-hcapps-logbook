@@ -34,13 +34,13 @@
   
   <div id="pageLogin" class="page active">
     <div class="bento-header shadow-lg">
-      <h3 class="fw-bold mb-0">JEF SYSTEM</h3>
-      <small class="opacity-50">Management Log v2.0</small>
+      <h3 class="fw-bold mb-0">JEF WEB APPS</h3>
+      <small class="opacity-50">Daily Log Book v1.0</small>
     </div>
     <div class="bento-card">
       <div class="mb-3">
         <label class="small fw-bold text-muted mb-2 d-block">USERNAME</label>
-        <input type="text" id="u" class="form-control" placeholder="Nama Lengkap">
+        <input type="text" id="u" class="form-control" placeholder="Username">
       </div>
       <div class="mb-4">
         <label class="small fw-bold text-muted mb-2 d-block">PASSWORD</label>
@@ -52,46 +52,46 @@
 
   <div id="pageMenu" class="page">
     <div class="mb-4 text-center">
-      <h5 class="fw-bold">Welcome back,</h5>
+      <h5 class="fw-bold">Selamat Datang,</h5>
       <h4 class="text-primary fw-bold" id="userLabel">User</h4>
     </div>
     <div class="row g-3">
       <div class="col-6">
         <div class="menu-item shadow-sm" onclick="showPlan()">
           <span class="menu-icon">✍️</span>
-          <span class="small fw-bold text-dark">DAILY PLAN</span>
+          <span class="small fw-bold text-dark">Buat Log Book</span>
         </div>
       </div>
       <div class="col-6">
         <div class="menu-item shadow-sm" onclick="showReport()">
           <span class="menu-icon">📊</span>
-          <span class="small fw-bold text-dark">REPORT LOG</span>
+          <span class="small fw-bold text-dark">Lengkapi Report</span>
         </div>
       </div>
     </div>
     <div class="text-center mt-5">
-      <button class="btn btn-link text-danger text-decoration-none small" onclick="location.reload()">LOGOUT</button>
+      <button class="btn btn-link text-danger text-decoration-none small" onclick="location.reload()">Keluar</button>
     </div>
   </div>
 
   <div id="pagePlan" class="page">
     <div class="bento-card">
-      <h6 class="fw-bold mb-4">Set Your Plan</h6>
+      <h6 class="fw-bold mb-4">Buat Daftar Log Book Hari Ini</h6>
       <div class="row g-2 mb-4">
         <div class="col-12"><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
         <div class="col-6"><input type="text" id="disPos" class="form-control bg-light" readonly></div>
         <div class="col-6"><input type="text" id="disDiv" class="form-control bg-light" readonly></div>
-        <div class="col-12 mt-2"><label class="small fw-bold mb-1">JAM MASUK</label><input type="time" id="clockIn" class="form-control"></div>
+        <div class="col-12 mt-2"><label class="small fw-bold mb-1">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
       </div>
       <div id="planContainer">
         <div class="input-group mb-2 shadow-sm rounded-3 overflow-hidden">
-          <input type="text" class="form-control border-0 tn" placeholder="Tugas">
-          <input type="text" class="form-control border-0 tt" placeholder="Target">
+          <input type="text" class="form-control border-0 tn" placeholder="Isi task / activity">
+          <input type="text" class="form-control border-0 tt" placeholder="Isi target dari task">
         </div>
       </div>
-      <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Add More Task</button>
-      <button class="btn btn-jef mt-4" onclick="submitPlan()">SAVE PLAN</button>
-      <button class="btn btn-link w-100 text-muted btn-sm mt-2" onclick="nav('pageMenu')">BACK</button>
+      <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Tambahkan Task</button>
+      <button class="btn btn-jef mt-4" onclick="submitPlan()">Buat Log Book</button>
+      <button class="btn btn-link w-100 text-muted btn-sm mt-2" onclick="nav('pageMenu')">Kembali ke Menu</button>
     </div>
   </div>
 
@@ -141,9 +141,9 @@
   async function doLogin() {
     const u = document.getElementById('u').value;
     const p = document.getElementById('p').value;
-    if(!u || !p) return Swal.fire('Error', 'Input credentials', 'warning');
+    if(!u || !p) return Swal.fire('Oops!', 'Lengkapi kredensial login terlebih dahulu.', 'warning');
     
-    loader('Authenticating...');
+    loader('Proses Autentifikasi...');
     const res = await callAPI({ action: 'checkLogin', u, p });
     Swal.close();
     if(res.success) { 
@@ -156,7 +156,7 @@
   }
 
   async function showPlan() {
-    loader('Fetching Profile...');
+    loader('Memuat profil...');
     const p = await callAPI({ action: 'getUserProfile', username: user });
     Swal.close();
     document.getElementById('disName').value = user;
@@ -176,9 +176,9 @@
     document.querySelectorAll('.tn').forEach((el, i) => {
       if(el.value) tasks.push({ name: el.value, target: document.querySelectorAll('.tt')[i].value });
     });
-    if(tasks.length === 0) return Swal.fire('Wait', 'Add at least 1 task', 'warning');
+    if(tasks.length === 0) return Swal.fire('Oops!', 'Setidaknya harus ada 1 tugas.', 'warning');
     
-    loader('Saving Plan...');
+    loader('Sedang menyimpan task...');
     const data = {
       name: user, position: document.getElementById('disPos').value, division: document.getElementById('disDiv').value,
       clockIn: document.getElementById('clockIn').value, date: new Date().toISOString().split('T')[0],
@@ -190,10 +190,10 @@
   }
 
   async function showReport() {
-    loader('Syncing Tasks...');
+    loader('Sedang menyinkronkan data logbook...');
     const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
-    if(tasks.length === 0) return Swal.fire('Info', 'No active plan for today.', 'info');
+    if(tasks.length === 0) return Swal.fire('Info', 'Tidak ada rencana aktif untuk hari ini.', 'info');
     let h = '';
     tasks.forEach(t => {
       h += `<div class="bento-card mb-3 bg-light" data-row="${t.row}" style="padding: 15px; border-radius: 16px;">
