@@ -861,51 +861,17 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzXloA4suXfFAke7Su3b0Zj4rCc2bhEcaxKUi0dWRIl9mYiWIDQPg3bEj9vVRBMKMH6iw/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzqV0yfZ2ZMs5GR_mPKTHL0bspkYztyUmzLod1EQ_wLszHhSvFZ8UC1YlGMzYssUNw73w/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
   async function callAPI(payload) {
-  try {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    // 🔥 DEBUG REQUEST (TARUH DI SINI)
-    console.log("📤 REQUEST KE SERVER:", payload);
-
     const response = await fetch(WEB_APP_URL, {
       method: 'POST',
-      body: JSON.stringify(payload),
-      signal: controller.signal
+      body: JSON.stringify(payload)
     });
-
-    clearTimeout(timeout);
-
-    const text = await response.text();
-
-    // 🔥 DEBUG RAW RESPONSE (TARUH DI SINI)
-    console.log("📥 RAW RESPONSE:", text);
-
-    let json;
-    try {
-      json = JSON.parse(text);
-    } catch (e) {
-      console.error("❌ JSON ERROR:", text);
-      throw new Error("Server tidak mengirim JSON valid");
-    }
-
-    // 🔥 DEBUG FINAL PARSED RESULT
-    console.log("✅ PARSED RESPONSE:", json);
-
-    return json;
-
-  } catch (err) {
-    console.error("❌ CALL API ERROR:", err);
-    throw err;
+    return await response.json();
   }
-}
-
-  /////
 
   function nav(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -916,6 +882,7 @@ select:-webkit-autofill {
     Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
   }
 
+  
   async function doLogin() {
     const u = document.getElementById('u').value;
     const p = document.getElementById('p').value;
@@ -1104,78 +1071,52 @@ async function showReport() {
   
 
 async function finalReport() {
-
-  const fieldRules = {
-  startTime: true,
-  endTime: true,
-  output: true,
-  issue: false,
-  completed: false   // ❗ FIX INI
-};
-
-  const isValid = (key, value) => {
-    if (!fieldRules[key]) return true;
-    if (typeof value === "boolean") return value === true;
-    return value !== "";
-  };
-
   let reports = [];
   let isAllValid = true;
-
+  
   const reportItems = document.querySelectorAll('.report-item');
-
+  
   reportItems.forEach(div => {
+    const startTime = div.querySelector('.r-start').value;
+    const endTime = div.querySelector('.r-end').value;
+    const output = div.querySelector('.r-out').value;
+    const issue = div.querySelector('.r-iss').value;
+    const completed = div.querySelector('.r-c').checked;
 
-    const data = {
-      startTime: div.querySelector('.r-start').value,
-      endTime: div.querySelector('.r-end').value,
-      output: div.querySelector('.r-out').value,
-      issue: div.querySelector('.r-iss').value,
-      completed: div.querySelector('.r-c').checked
-    };
-
-    const invalid = Object.keys(fieldRules).some(key => !isValid(key, data[key]));
-
-    if (invalid) {
+    // VALIDASI FIELD WAJIB
+    if (!startTime || !endTime || !output || !issue || !completed) {
       isAllValid = false;
-      div.style.border = "1px solid #ff4d4d";
+      div.style.border = "1px solid #ff4d4d"; // Tandai box merah jika salah
     } else {
       div.style.border = "none";
       div.style.borderLeft = "5px solid #f5c451";
     }
 
-    reports.push({ row: div.dataset.row, ...data });
+    reports.push({
+      row: div.dataset.row,
+      startTime,
+      endTime,
+      output,
+      issue,
+      completed
+    });
   });
 
   if (!isAllValid) {
-    return Swal.fire('Oops!', 'Mohon lengkapi semua field wajib sebelum mengirim report.', 'warning');
+    return Swal.fire('Oops!', 'Mohon lengkapi Jam, Output, Kendala, dan Centang Selesai di setiap tugas.', 'warning');
   }
-
-  console.log("REPORT PAYLOAD FINAL:", reports);
 
   loader('Mengirim Report...');
-
-try {
-  const res = await callAPI({
-    action: 'submitReport',
-    data: {
-      reports: reports,
-      note: document.getElementById('genNote').value
-    }
+  const res = await callAPI({ 
+    action: 'submitReport', 
+    data: { 
+      reports: JSON.stringify(reports), 
+      note: document.getElementById('genNote').value 
+    } 
   });
-
-  console.log(res);
-
-  if (!res.success) {
-    throw new Error(res.message);
-  }
-
-  Swal.fire('Berhasil', res.message, 'success');
+  
+  Swal.fire('Berhasil', res.message, 'success'); 
   nav('pageMenu');
-
-} catch (err) {
-  console.error(err);
-  Swal.fire('Error', err.message || 'Server gagal memproses request', 'error');
 }
   ///
 
