@@ -99,6 +99,20 @@ body {
     abel.small.fw-semibold.mb-2 {
     font-size: 12px!important;
 }
+
+    i.bi {
+    font-size: 18px;
+}
+
+    .form-check .form-check-input {
+    float: left;
+    margin-left: 0;
+}
+
+    .form-check-input:checked {
+    background-color: #25d583;
+    border-color: #18ae68;
+}
     
    .app-shell {
   width: 100%;
@@ -158,6 +172,7 @@ body {
   bottom: 0;
   background: rgba(20,20,20,0.95) !important;
   backdrop-filter: blur(10px);
+      text-align:center;
 }
 
  #reportContainer {
@@ -427,6 +442,10 @@ button.swal2-styled {
     color: white !important;
   }
 
+    .sentence-case::first-letter {
+  text-transform: uppercase;
+}
+    
   .text-primary {
     color: var(--gold-soft) !important;
   }
@@ -795,23 +814,29 @@ select:-webkit-autofill {
 </div>
       
       <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Tambahkan Task</button>
-      <button class="btn btn-jef mt-4" onclick="submitPlan()">Buat Log Book</button>
+      <button class="btn btn-jef mt-4 w-100 fw-bold p-3 rounded-4 d-flex align-items-center justify-content-center gap-2"
+        onclick="submitPlan()">
+  <i class="bi bi-journal-plus"></i>
+  <span>Buat Log Book</span>
+</button>
       <button class="btn btn-link w-100 text-muted btn-sm mt-2" onclick="nav('pageMenu')">Kembali ke Menu</button>
     </div>
   </div>
 
   <div id="pageReport" class="page">
     <div class="bento-card p-0 overflow-hidden">
-      <div class="p-4 border-bottom bg-primary text-white">
-        <h6 class="mb-0 fw-bold">Silahkan Isi Laporan LogBook</h6>
+      <div class="p-4 border-bottom bg-primary text-white text-center">
+        <h5 class="mb-0 fw-bold">Silahkan Isi Laporan LogBook</h5>
       </div>
       <div class="p-4 report-scroll">
   <div id="reportContainer"></div>
   
 </div>
       <div class="p-4 border-top bg-light">
-        <button class="btn btn-jef w-100 fw-bold p-3 rounded-4" onclick="finalReport()">
-  Selesaikan LogBook
+        <button class="btn btn-jef w-100 fw-bold p-3 rounded-4 mb-3 d-flex align-items-center justify-content-center gap-2"
+        onclick="finalReport()">
+  <i class="bi bi-send-check-fill"></i>
+  <span>Selesaikan LogBook</span>
 </button>
         <button class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
         onclick="nav('pageMenu')">
@@ -963,13 +988,13 @@ async function showReport() {
     }
 
     let h = '';
-    tasks.forEach(t => {
+    tasks.forEach((t, i) => {
       h += `
-      <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding: 18px; border-radius: 16px; border-left: 6px solid #f5c451;">
+      <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding: 18px; border-radius: 16px; border-left: 3px solid #f5c451;">
         <div class="mb-2">
-          <span class="badge bg-primary text-dark mb-1">TASK</span>
-          <p class="mb-1 fw-bold text-white small">${t.task}</p>
-          <small class="text-muted d-block mb-3">Target: ${t.target}</small>
+         <span class="badge bg-primary text-dark mb-1">TASK ${i + 1}</span>
+          <p class="mb-1 fw-bold text-white small sentence-case">${t.task}</p>
+          <small class="text-muted d-block mb-3 sentence-case">Target: ${t.target}</small>
         </div>
         
         <div class="row g-2">
@@ -978,7 +1003,7 @@ async function showReport() {
     <div class="col-6">
   <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
     <i class="bi bi-play-circle text-warning"></i>
-    Jam Mulai *
+    Waktu Mulai*
   </label>
 
   <div class="time-box">
@@ -990,7 +1015,7 @@ async function showReport() {
 <div class="col-6">
   <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
     <i class="bi bi-stop-circle text-warning"></i>
-    Jam Selesai *
+    Waktu Selesai*
   </label>
 
   <div class="time-box">
