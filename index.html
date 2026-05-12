@@ -80,10 +80,11 @@
 
     
 body {
-  background:
-    radial-gradient(circle at top right, rgba(245,196,81,0.12), transparent 30%),
-    radial-gradient(circle at bottom left, rgba(245,196,81,0.08), transparent 25%),
-    var(--bg-main);
+ 
+
+    background: var(--bg-main);
+  position: relative;
+  
 
   font-family: 'Plus Jakarta Sans', sans-serif;
 
@@ -96,6 +97,38 @@ body {
   overflow-x: hidden;
 }
 
+
+    body::before {
+  content: "";
+  position: fixed;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  z-index: -1;
+
+  background:
+    radial-gradient(circle at 30% 30%, rgba(245,196,81,0.18), transparent 35%),
+    radial-gradient(circle at 70% 70%, rgba(245,196,81,0.10), transparent 40%),
+    radial-gradient(circle at 20% 80%, rgba(245,196,81,0.08), transparent 30%);
+
+  animation: bgMove 18s ease-in-out infinite alternate;
+  filter: blur(40px);
+  transform: translate3d(0,0,0);
+}
+
+
+    @keyframes bgMove {
+  0% {
+    transform: translate(-5%, -5%) scale(1);
+  }
+  50% {
+    transform: translate(5%, 3%) scale(1.1);
+  }
+  100% {
+    transform: translate(-3%, 6%) scale(1.05);
+  }
+}
     abel.small.fw-semibold.mb-2 {
     font-size: 12px!important;
 }
@@ -113,6 +146,10 @@ body {
     background-color: #25d583;
     border-color: #18ae68;
 }
+
+    .form-check-input:focus{
+      box-shadow:none;
+    }
     
    .app-shell {
   width: 100%;
@@ -696,23 +733,23 @@ select:-webkit-autofill {
        background: linear-gradient(145deg, #a87e00, #ffdcb0);
      " alt="Loading Profile">
       
-      <h5 class="fw-light">
+      <h6 class="fw-light">
   Hai, Selamat Datang 
   <span class="wave">👋</span>
-</h5>
-      <h4 class="text-primary fw-bold" id="userLabel">User</h4>
+</h6>
+      <h3 class="text-primary fw-bold" id="userLabel">User</h3>
     </div>
     <div class="row g-3 justify-content-center w-100">
       <div class="col-6">
         <div class="menu-item shadow-sm" onclick="showPlan()">
           <span class="menu-icon">✍️</span>
-          <span class="small fw-bold text-dark">Buat Log Book</span>
+          <span class="small fw-bold text-dark">Buat Daily LogBook</span>
         </div>
       </div>
       <div class="col-6">
         <div class="menu-item shadow-sm" onclick="showReport()">
           <span class="menu-icon">📑</span>
-          <span class="small fw-bold text-dark">Lengkapi Report</span>
+          <span class="small fw-bold text-dark">Selesaikan LogBook</span>
         </div>
       </div>
     </div>
@@ -721,7 +758,7 @@ select:-webkit-autofill {
 <button class="btn btn-outline-secondary btn-sm d-inline-flex align-items-center gap-2"
         onclick="confirmExit()">
   <i class="bi bi-box-arrow-right"></i>
-  Keluar
+  Keluar Aplikasi
 </button>
       
     </div>
