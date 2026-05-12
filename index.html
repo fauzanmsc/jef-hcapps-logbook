@@ -868,14 +868,31 @@ async function showReport() {
         </div>
         
         <div class="row g-2">
-          <div class="col-6">
-            <label class="text-muted small mb-1">Jam Mulai *</label>
-            <input class="form-control timepicker r-start" placeholder="Jam Mulai">
-          </div>
-          <div class="col-6">
-            <label class="text-muted small mb-1">Jam Selesai *</label>
-            <input class="form-control timepicker r-end" placeholder="Jam Selesai">
-          </div>
+        
+         <div class="col-6">
+  <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
+    <i class="bi bi-play-circle text-warning"></i>
+    Jam Mulai *
+  </label>
+
+  <div class="time-box">
+    <i class="bi bi-clock text-warning"></i>
+    <input class="form-control timepicker r-start" placeholder="00:00">
+  </div>
+</div>
+
+<div class="col-6">
+  <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
+    <i class="bi bi-stop-circle text-warning"></i>
+    Jam Selesai *
+  </label>
+
+  <div class="time-box">
+    <i class="bi bi-clock-history text-warning"></i>
+    <input class="form-control timepicker r-end" placeholder="00:00">
+  </div>
+</div>
+          
           <div class="col-12 mt-2">
             <input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib) *">
           </div>
