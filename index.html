@@ -603,7 +603,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbylKDTQ7t7XrvppRmPZYlqLCZvEvLUjiFNsKIFP9mxbDklVdm_gCL0xVq4kO1mye8Yl7Q/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwzfD_kQlaefDBrN1-BHEpE3ygFJsyMCBNql9Z4VtPnjd4w2ha5fiKM3476mPp7Tp7-qw/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -633,10 +633,8 @@ select:-webkit-autofill {
     const res = await callAPI({ action: 'checkLogin', u, p });
     Swal.close();
     if(res.success) { 
-     user = res.username;
-     /* document.getElementById('userLabel').innerText = user; *//
-      document.getElementById('userLabel').innerText = p.fullName;
-
+      user = res.name; 
+      document.getElementById('userLabel').innerText = user; 
       nav('pageMenu'); 
     } else { 
       Swal.fire('Login Gagal', 'Username atau password yang dimasukkan salah.', 'error');
@@ -644,20 +642,15 @@ select:-webkit-autofill {
   }
 
   async function showPlan() {
-  loader('Memuat logbook...');
-  
-  const p = await callAPI({ action: 'getUserProfile', username: user });
-
-  Swal.close();
-
-  document.getElementById('disName').value = p.fullName;
-  document.getElementById('disPos').value = p.position;
-  document.getElementById('disDiv').value = p.division;
-
-  document.getElementById('clockIn').value = new Date().toTimeString().slice(0,5);
-
-  nav('pagePlan');
-}
+    loader('Memuat logbook...');
+    const p = await callAPI({ action: 'getUserProfile', username: user });
+    Swal.close();
+    document.getElementById('disName').value = user;
+    document.getElementById('disPos').value = p.position;
+    document.getElementById('disDiv').value = p.division;
+    document.getElementById('clockIn').value = new Date().toTimeString().slice(0,5);
+    nav('pagePlan');
+  }
   
 
 function addPlanField() {
