@@ -530,7 +530,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwxYVEC7GkhpgZYIU4T0Incs9eXbAaPLXKy5G3-cjXnMVxRrWLUC71t1p9AtdoCOgiruQ/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzO1oKF5N0yXU0OtVOJjqFbrnYRQdNgYMizErdKpynbXxV_v6kTyl8tTcRdlT4A3hohmA/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -635,33 +635,52 @@ function addPlanField() {
     nav('pageMenu');
   }
 
-  async function showReport() {
-    loader('Syncing Tasks...');
-    const tasks = await callAPI({ 
-  action: 'getActiveTasks', 
-  username: user 
-});
+ async function showReport() {
+  loader('Syncing Tasks...');
 
-console.log(tasks);
-    
-    Swal.close();
-    if(tasks.length === 0) return Swal.fire('Info', 'No active plan for today.', 'info');
-    let h = '';
-    tasks.forEach(t => {
-      h += `<div class="bento-card mb-3 bg-light" data-row="${t.row}" style="padding: 15px; border-radius: 16px;">
+  const res = await callAPI({ 
+    action: 'getActiveTasks', 
+    username: user 
+  });
+
+  console.log(res);
+
+  if (res.error) {
+    Swal.fire('Error', res.error, 'error');
+    return;
+  }
+
+  const tasks = Array.isArray(res) ? res : [];
+
+  if (tasks.length === 0) {
+    return Swal.fire('Info', 'No active plan for today.', 'info');
+  }
+
+  let h = '';
+
+  tasks.forEach(t => {
+    h += `
+      <div class="bento-card mb-3 bg-light" data-row="${t.row}">
         <p class="mb-2 fw-bold text-dark small">${t.task}</p>
         <div class="row g-2">
           <div class="col-6"><input type="time" class="form-control form-control-sm r-start"></div>
           <div class="col-6"><input type="time" class="form-control form-control-sm r-end"></div>
-          <div class="col-12"><input type="text" class="form-control form-control-sm r-out" placeholder="Output Result"></div>
-          <div class="col-12"><input type="text" class="form-control form-control-sm r-iss" placeholder="Issue/Kendala"></div>
-          <div class="col-12"><div class="form-check form-switch"><input class="form-check-input r-c" type="checkbox"> <label class="small fw-bold">Done</label></div></div>
+          <div class="col-12"><input type="text" class="form-control form-control-sm r-out"></div>
+          <div class="col-12"><input type="text" class="form-control form-control-sm r-iss"></div>
+          <div class="col-12">
+            <div class="form-check form-switch">
+              <input class="form-check-input r-c" type="checkbox">
+              <label class="small fw-bold">Done</label>
+            </div>
+          </div>
         </div>
-      </div>`;
-    });
-    document.getElementById('reportContainer').innerHTML = h;
-    nav('pageReport');
-  }
+      </div>
+    `;
+  });
+
+  document.getElementById('reportContainer').innerHTML = h;
+  nav('pageReport');
+}
 
   async function finalReport() {
     let reports = [];
