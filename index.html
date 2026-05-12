@@ -105,8 +105,7 @@ body {
 }
 
 .page.active {
-  display: flex;
-  
+  display: flex!importangt;
   animation: fadeIn 0.4s ease;
 }
 
@@ -911,6 +910,7 @@ function removeTask(button) {
 
   const active = document.getElementById(id);
   active.classList.add('active');
+  active.style.display = "flex";
 }
 
 function confirmExit() {
