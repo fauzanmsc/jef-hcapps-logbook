@@ -188,7 +188,7 @@
     box-shadow:
       0 0 0 4px rgba(245,196,81,0.15);
     border-color: var(--gold);
-    background: #222;
+    background: #333333;
     color: white;
   }
 
@@ -355,7 +355,9 @@ select:-webkit-autofill {
 
   <div id="pagePlan" class="page">
     <div class="bento-card">
-      <h6 class="fw-bold mb-4">Buat Daftar Log Book Hari Ini</h6>
+      <h6 class="fw-bold mb-4 text-center">
+  Buat Daftar Log Book Hari Ini
+</h6>
       <div class="row g-2 mb-4">
         <div class="col-12"><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
         <div class="col-6"><input type="text" id="disPos" class="form-control bg-light" readonly></div>
@@ -363,7 +365,7 @@ select:-webkit-autofill {
         <div class="col-12 mt-2"><label class="small fw-bold mb-1">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
       </div>
       <div id="planContainer">
-        <div class="input-group mb-2 shadow-sm rounded-3 overflow-hidden">
+        <div class="input-group mb-2 shadow-sm overflow-hidden">
           <input type="text" class="form-control border-0 tn" placeholder="Isi task / activity">
           <input type="text" class="form-control border-0 tt" placeholder="Isi target dari task">
         </div>
