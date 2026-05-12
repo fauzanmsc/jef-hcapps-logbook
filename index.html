@@ -866,12 +866,34 @@ select:-webkit-autofill {
 
   // Fungsi helper untuk hit API
   async function callAPI(payload) {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000); // 15 detik
+
     const response = await fetch(WEB_APP_URL, {
       method: 'POST',
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: controller.signal
     });
-    return await response.json();
+
+    clearTimeout(timeout);
+
+    const text = await response.text(); // jangan langsung JSON
+
+    try {
+      return JSON.parse(text);
+    } catch (e) {
+      console.error("Invalid JSON response:", text);
+      throw new Error("Server tidak mengirim JSON valid");
+    }
+
+  } catch (err) {
+    console.error(err);
+    throw err;
   }
+}
+
+  /////
 
   function nav(id) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1066,27 +1088,23 @@ async function showReport() {
   }
 }
 
+
+  
+
 async function finalReport() {
 
-  // =========================
-  // CONFIG FIELD RULES
-  // =========================
   const fieldRules = {
-    startTime: true,   // true = wajib
+    startTime: true,
     endTime: true,
     output: true,
     issue: false,
     completed: true
   };
 
-  // =========================
-  // VALIDATION HELPER
-  // =========================
   const isValid = (key, value) => {
-    if (!fieldRules[key]) return true; // kalau false = tidak wajib
-
+    if (!fieldRules[key]) return true;
     if (typeof value === "boolean") return value === true;
-    return value !== null && value !== undefined && value !== "";
+    return value !== "";
   };
 
   let reports = [];
@@ -1104,12 +1122,7 @@ async function finalReport() {
       completed: div.querySelector('.r-c').checked
     };
 
-    // =========================
-    // VALIDATION CHECK
-    // =========================
-    const invalid = Object.keys(fieldRules).some(key => {
-      return !isValid(key, data[key]);
-    });
+    const invalid = Object.keys(fieldRules).some(key => !isValid(key, data[key]));
 
     if (invalid) {
       isAllValid = false;
@@ -1119,38 +1132,31 @@ async function finalReport() {
       div.style.borderLeft = "5px solid #f5c451";
     }
 
-    reports.push({
-      row: div.dataset.row,
-      ...data
-    });
+    reports.push({ row: div.dataset.row, ...data });
   });
 
-  // =========================
-  // ERROR HANDLING
-  // =========================
   if (!isAllValid) {
-    return Swal.fire(
-      'Oops!',
-      'Mohon lengkapi semua field wajib sebelum mengirim report.',
-      'warning'
-    );
+    return Swal.fire('Oops!', 'Mohon lengkapi semua field wajib sebelum mengirim report.', 'warning');
   }
 
-  // =========================
-  // SEND DATA
-  // =========================
   loader('Mengirim Report...');
 
-  const res = await callAPI({
-    action: 'submitReport',
-    data: {
-      reports: JSON.stringify(reports),
-      note: document.getElementById('genNote').value
-    }
-  });
+  try {
+    const res = await callAPI({
+      action: 'submitReport',
+      data: {
+        reports: JSON.stringify(reports),
+        note: document.getElementById('genNote').value
+      }
+    });
 
-  Swal.fire('Berhasil', res.message, 'success');
-  nav('pageMenu');
+    Swal.fire('Berhasil', res.message, 'success');
+    nav('pageMenu');
+
+  } catch (err) {
+    Swal.fire('Error', 'Gagal mengirim report. Cek koneksi / server.', 'error');
+    console.error(err);
+  }
 }
   ///
 
