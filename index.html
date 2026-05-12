@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <base target="_top">
 
   <!-- Primary Meta Tags -->
@@ -43,24 +44,41 @@
     --card-radius: 24px;
   }
 
-  body {
-    background:
-      radial-gradient(circle at top right, rgba(245,196,81,0.12), transparent 30%),
-      radial-gradient(circle at bottom left, rgba(245,196,81,0.08), transparent 25%),
-      var(--bg-main);
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    margin: 0;
-    padding: 20px 20px 60px;
-    color: var(--text);
-  }
+    html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+    * {
+  box-sizing: border-box;
+}
+
+
+    
+body {
+  background:
+    radial-gradient(circle at top right, rgba(245,196,81,0.12), transparent 30%),
+    radial-gradient(circle at bottom left, rgba(245,196,81,0.08), transparent 25%),
+    var(--bg-main);
+
+  font-family: 'Plus Jakarta Sans', sans-serif;
+
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px 16px 80px;
+
+  color: var(--text);
+
+  display: block; /* 🔥 penting: stop flex center */
+  overflow-x: hidden;
+}
 
   .app-shell {
     width: 100%;
     max-width: 480px;
+  margin: 0 auto;
+    min-height: 100vh;
+
     animation: fadeIn 0.6s ease;
   }
 
@@ -311,7 +329,38 @@ select:-webkit-autofill {
 .app-footer small {
   opacity: 0.85;
 }
-    
+
+
+
+    @media (max-width: 480px) {
+
+  .bento-card {
+    padding: 18px;
+    border-radius: 18px;
+  }
+
+  .bento-header {
+    padding: 25px 18px;
+  }
+
+  .menu-item {
+    padding: 18px;
+  }
+
+  .menu-icon {
+    font-size: 2rem;
+  }
+
+  .btn-jef {
+    padding: 12px;
+    font-size: 14px;
+  }
+
+  input, .form-control {
+    font-size: 14px;
+  }
+
+}
 </style>
 </head>
 <body>
@@ -386,20 +435,63 @@ select:-webkit-autofill {
   <div id="pagePlan" class="page">
     <div class="bento-card">
       <h6 class="fw-bold mb-4 text-center">
-  Buat Daftar Log Book Hari Ini
-</h6>
-      <div class="row g-2 mb-4">
-        <div class="col-12"><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
-        <div class="col-6"><input type="text" id="disPos" class="form-control bg-light" readonly></div>
-        <div class="col-6"><input type="text" id="disDiv" class="form-control bg-light" readonly></div>
-        <div class="col-12 mt-2"><label class="small fw-bold mb-1">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
-      </div>
-      <div id="planContainer">
-        <div class="input-group mb-2 shadow-sm overflow-hidden">
-          <input type="text" class="form-control border-0 tn" placeholder="Isi task / activity">
-          <input type="text" class="form-control border-0 tt" placeholder="Isi target dari task">
+        Buat Daftar Log Book Hari Ini
+      </h6>
+      
+      <div class="d-flex justify-content-between align-items-center mb-4 px-1">
+        <div class="small text-muted">
+          <i class="bi bi-calendar-event me-1"></i>
+          <span id="currentDate"></span>
+        </div>
+      
+        <div class="small text-muted">
+          <i class="bi bi-clock me-1"></i>
+          <span id="liveClock"></span>
         </div>
       </div>
+      
+      <div class="row g-2 mb-4">
+        <div class="col-12"><label class="small fw-semibold mb-2">Nama Karyawan</label><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
+        <div class="col-6"><label class="small fw-semibold mb-2">Jabatan / Posisi</label><input type="text" id="disPos" class="form-control bg-light" readonly></div>
+        <div class="col-6"><label class="small fw-semibold mb-2">Departemen / Divisi</label><input type="text" id="disDiv" class="form-control bg-light" readonly></div>
+        <div class="col-12 mt-2"><label class="small fw-semibold mb-2">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
+      </div>
+      
+<div id="planContainer">
+
+  <!-- Default Field (Tidak bisa dihapus) -->
+  <div class="row g-2 mb-2 task-row">
+    
+    <div class="col-5">
+      <input 
+        type="text" 
+        class="form-control tn shadow-sm" 
+        placeholder="Isi task / activity"
+      >
+    </div>
+
+    <div class="col-5">
+      <input 
+        type="text" 
+        class="form-control tt shadow-sm" 
+        placeholder="Isi target dari task"
+      >
+    </div>
+
+    <div class="col-2">
+      <button 
+        type="button"
+        class="btn btn-dark w-100 h-100"
+        disabled
+      >
+        <i class="bi bi-dash-lg"></i>
+      </button>
+    </div>
+
+  </div>
+
+</div>
+      
       <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Tambahkan Task</button>
       <button class="btn btn-jef mt-4" onclick="submitPlan()">Buat Log Book</button>
       <button class="btn btn-link w-100 text-muted btn-sm mt-2" onclick="nav('pageMenu')">Kembali ke Menu</button>
@@ -438,7 +530,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz9gLvqinf4E0sfRMaKlglH8bii87sJgT5j83A94FGuGczekVciKVyKueq2UXBqFuXdfg/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwWbLJwx9AXCg0PiuQXjlgU8yDbQpR523VGcYT54druRPth64sjJlyhlDk9Om4rdHcntQ/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -472,12 +564,12 @@ select:-webkit-autofill {
       document.getElementById('userLabel').innerText = user; 
       nav('pageMenu'); 
     } else { 
-      Swal.fire('Error', 'Wrong Password/Username', 'error'); 
+      Swal.fire('Login Gagal', 'Username atau password yang dimasukkan salah.', 'error');
     }
   }
 
   async function showPlan() {
-    loader('Memuat profil...');
+    loader('Memuat logbook...');
     const p = await callAPI({ action: 'getUserProfile', username: user });
     Swal.close();
     document.getElementById('disName').value = user;
@@ -486,11 +578,45 @@ select:-webkit-autofill {
     document.getElementById('clockIn').value = new Date().toTimeString().slice(0,5);
     nav('pagePlan');
   }
+  
 
-  function addPlanField() {
-    const html = `<div class="input-group mb-2 shadow-sm rounded-3 overflow-hidden animate__animated animate__fadeInUp"><input type="text" class="form-control border-0 tn" placeholder="Tugas"><input type="text" class="form-control border-0 tt" placeholder="Target"></div>`;
-    document.getElementById('planContainer').insertAdjacentHTML('beforeend', html);
-  }
+function addPlanField() {
+  const html = `
+    <div class="row g-2 mb-2 task-row animate__animated animate__fadeInUp">
+      
+      <div class="col-5">
+        <input 
+          type="text" 
+          class="form-control tn shadow-sm" 
+          placeholder="Isi task / activity"
+        >
+      </div>
+
+      <div class="col-5">
+        <input 
+          type="text" 
+          class="form-control tt shadow-sm" 
+          placeholder="Isi target dari task"
+        >
+      </div>
+
+      <div class="col-2">
+        <button 
+          type="button"
+          class="btn btn-outline-danger w-100 h-100"
+          onclick="removeTask(this)"
+        >
+          <i class="bi bi-trash3-fill"></i>
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  document
+    .getElementById('planContainer')
+    .insertAdjacentHTML('beforeend', html);
+}
 
   async function submitPlan() {
     let tasks = [];
@@ -502,7 +628,7 @@ select:-webkit-autofill {
     loader('Sedang menyimpan task...');
     const data = {
       name: user, position: document.getElementById('disPos').value, division: document.getElementById('disDiv').value,
-      clockIn: document.getElementById('clockIn').value, date: new Date().toISOString().split('T')[0],
+      clockIn: document.getElementById('clockIn').value, date: new Date().toLocaleDateString('sv-SE'),
       tasks: JSON.stringify(tasks)
     };
     const res = await callAPI({ action: 'savePlan', data });
@@ -510,45 +636,102 @@ select:-webkit-autofill {
     nav('pageMenu');
   }
 
-  async function showReport() {
-    loader('Sedang menyinkronkan data...');
+////
+async function showReport() {
+    loader('Sinkronisasi Tugas...');
     const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
-    if(tasks.length === 0) return Swal.fire('Info', 'Tidak ada task aktif untuk hari ini.', 'info');
+    
+    if(tasks.length === 0) {
+      return Swal.fire('Info', 'Tidak ada rencana tugas aktif untuk hari ini atau semua sudah dilaporkan.', 'info');
+    }
+
     let h = '';
     tasks.forEach(t => {
-      h += `<div class="bento-card mb-3 bg-light" data-row="${t.row}" style="padding: 15px; border-radius: 16px;">
-        <p class="mb-2 fw-bold text-dark small">${t.task}</p>
+      h += `
+      <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding: 15px; border-radius: 16px; border-left: 5px solid #f5c451;">
+        <p class="mb-2 fw-bold text-white small"><i class="bi bi-card-checklist me-2"></i>${t.task}</p>
+        <p class="text-muted small mb-3">Target: ${t.target}</p>
         <div class="row g-2">
-          <div class="col-6"><input type="time" class="form-control form-control-sm r-start"></div>
-          <div class="col-6"><input type="time" class="form-control form-control-sm r-end"></div>
-          <div class="col-12"><input type="text" class="form-control form-control-sm r-out" placeholder="Output Result"></div>
-          <div class="col-12"><input type="text" class="form-control form-control-sm r-iss" placeholder="Issue/Kendala"></div>
-          <div class="col-12"><div class="form-check form-switch"><input class="form-check-input r-c" type="checkbox"> <label class="small fw-bold">Done</label></div></div>
+          <div class="col-6">
+            <label class="xsmall text-muted">Mulai</label>
+            <input type="time" class="form-control form-control-sm r-start" required>
+          </div>
+          <div class="col-6">
+            <label class="xsmall text-muted">Selesai</label>
+            <input type="time" class="form-control form-control-sm r-end" required>
+          </div>
+          <div class="col-12">
+            <input type="text" class="form-control form-control-sm r-out" placeholder="Output Result (Wajib)" required>
+          </div>
+          <div class="col-12">
+            <input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Wajib)" required>
+          </div>
+          <div class="col-12 mt-2">
+            <div class="form-check form-switch">
+              <input class="form-check-input r-c" type="checkbox" id="check${t.row}" required> 
+              <label class="form-check-label small fw-bold text-white" for="check${t.row}">Selesai / Done?</label>
+            </div>
+          </div>
         </div>
       </div>`;
     });
     document.getElementById('reportContainer').innerHTML = h;
     nav('pageReport');
-  }
+}
 
   async function finalReport() {
     let reports = [];
-    document.querySelectorAll('#reportContainer > div').forEach(div => {
+    let isValid = true;
+    
+    const items = document.querySelectorAll('.report-item');
+    
+    items.forEach(div => {
+      const startTime = div.querySelector('.r-start').value;
+      const endTime = div.querySelector('.r-end').value;
+      const output = div.querySelector('.r-out').value;
+      const issue = div.querySelector('.r-iss').value;
+      const completed = div.querySelector('.r-c').checked;
+
+      // Validasi Field Wajib
+      if (!startTime || !endTime || !output || !issue || !completed) {
+        isValid = false;
+        div.style.borderColor = "#ff4d4d"; // Beri tanda merah jika belum lengkap
+      } else {
+        div.style.borderColor = "#f5c451";
+      }
+
       reports.push({
-        row: div.dataset.row, startTime: div.querySelector('.r-start').value, endTime: div.querySelector('.r-end').value,
-        output: div.querySelector('.r-out').value, issue: div.querySelector('.r-iss').value, completed: div.querySelector('.r-c').checked
+        row: div.dataset.row, 
+        startTime, 
+        endTime,
+        output, 
+        issue, 
+        completed
       });
     });
-    loader('Submitting...');
+
+    if (!isValid) {
+      return Swal.fire('Perhatian', 'Mohon lengkapi semua field wajib (termasuk checkbox Done) untuk setiap task.', 'warning');
+    }
+
+    loader('Mengirim Report...');
     const res = await callAPI({ 
       action: 'submitReport', 
-      data: { reports: JSON.stringify(reports), note: document.getElementById('genNote').value } 
+      data: { 
+        reports: JSON.stringify(reports), 
+        note: document.getElementById('genNote').value 
+      } 
     });
-    Swal.fire('Great!', res.message, 'success'); 
+    
+    Swal.fire('Berhasil!', res.message, 'success'); 
     nav('pageMenu');
-  }
+}
 
+  ///
+
+
+  
 function togglePassword() {
   const input = document.getElementById('p');
   const icon = document.querySelector('.toggle-password i');
@@ -560,6 +743,47 @@ function togglePassword() {
     input.type = 'password';
     icon.className = 'bi bi-eye-fill';
   }
+}
+
+function updateDateTime() {
+  const now = new Date();
+
+  const dateOptions = {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  };
+
+  const currentDate = now.toLocaleDateString('id-ID', dateOptions);
+
+  const currentTime = now.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
+  document.getElementById('currentDate').innerText = currentDate;
+  document.getElementById('liveClock').innerText = currentTime;
+}
+
+updateDateTime();
+setInterval(updateDateTime, 1000);
+
+function removeTask(button) {
+  const totalTask = document.querySelectorAll('.task-row').length;
+
+  // Minimal 1 field tersisa
+  if (totalTask <= 1) {
+    Swal.fire(
+      'Oops!',
+      'Minimal harus ada 1 task.',
+      'warning'
+    );
+    return;
+  }
+
+  button.closest('.task-row').remove();
 }
   
 </script>
