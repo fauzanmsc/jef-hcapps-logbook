@@ -481,7 +481,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwuTh2JqVYt8S6JHYv31NMDPNONkzINUpfEvnzHKHjdkuo9HJ5cBDEkMVnCpg6vpkOZvA/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwudqHbPPhLZsPMk-COYuD7GPwOLdNxKBrfNaeNA4XeFE0KQVmy-WWkiA49IxvAUTDwRw/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -588,7 +588,13 @@ function addPlanField() {
 
   async function showReport() {
     loader('Syncing Tasks...');
-    const tasks = await callAPI({ action: 'getActiveTasks', username: user });
+    const tasks = await callAPI({ 
+  action: 'getActiveTasks', 
+  username: user 
+});
+
+console.log(tasks);
+    
     Swal.close();
     if(tasks.length === 0) return Swal.fire('Info', 'No active plan for today.', 'info');
     let h = '';
