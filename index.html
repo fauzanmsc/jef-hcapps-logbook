@@ -408,23 +408,27 @@ select:-webkit-autofill {
         <div class="col-12 mt-2"><label class="small fw-bold mb-1">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
       </div>
       
-      <div id="planContainer">
-        <div class="task-item mb-3">
-          
-          <input 
-            type="text" 
-            class="form-control tn mb-2" 
-            placeholder="Isi task / activity"
-          >
-      
-          <input 
-            type="text" 
-            class="form-control tt" 
-            placeholder="Isi target dari task"
-          >
-      
-        </div>
-      </div>
+<div id="planContainer">
+  <div class="row g-2 mb-2">
+    
+    <div class="col-6">
+      <input 
+        type="text" 
+        class="form-control tn shadow-sm" 
+        placeholder="Isi task / activity"
+      >
+    </div>
+
+    <div class="col-6">
+      <input 
+        type="text" 
+        class="form-control tt shadow-sm" 
+        placeholder="Isi target dari task"
+      >
+    </div>
+
+  </div>
+</div>
       
       <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Tambahkan Task</button>
       <button class="btn btn-jef mt-4" onclick="submitPlan()">Buat Log Book</button>
@@ -513,10 +517,32 @@ select:-webkit-autofill {
     nav('pagePlan');
   }
 
-  function addPlanField() {
-    const html = `<div class="input-group mb-2 shadow-sm rounded-3 overflow-hidden animate__animated animate__fadeInUp"><input type="text" class="form-control border-0 tn" placeholder="Tugas"><input type="text" class="form-control border-0 tt" placeholder="Target"></div>`;
-    document.getElementById('planContainer').insertAdjacentHTML('beforeend', html);
-  }
+function addPlanField() {
+  const html = `
+    <div class="row g-2 mb-2 animate__animated animate__fadeInUp">
+      
+      <div class="col-6">
+        <input 
+          type="text" 
+          class="form-control tn shadow-sm" 
+          placeholder="Isi task / activity"
+        >
+      </div>
+
+      <div class="col-6">
+        <input 
+          type="text" 
+          class="form-control tt shadow-sm" 
+          placeholder="Isi target dari task"
+        >
+      </div>
+
+    </div>
+  `;
+
+  document.getElementById('planContainer')
+    .insertAdjacentHTML('beforeend', html);
+}
 
   async function submitPlan() {
     let tasks = [];
