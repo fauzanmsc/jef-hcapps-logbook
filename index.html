@@ -223,10 +223,10 @@
   }
 
   async function showReport() {
-    loader('Sedang menyinkronkan data logbook...');
+    loader('Sedang menyinkronkan data...');
     const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
-    if(tasks.length === 0) return Swal.fire('Info', 'Tidak ada rencana aktif untuk hari ini.', 'info');
+    if(tasks.length === 0) return Swal.fire('Info', 'Tidak ada task aktif untuk hari ini.', 'info');
     let h = '';
     tasks.forEach(t => {
       h += `<div class="bento-card mb-3 bg-light" data-row="${t.row}" style="padding: 15px; border-radius: 16px;">
