@@ -56,8 +56,12 @@
 
     .wave {
   display: inline-block;
-  animation: waveHand 1.5s infinite;
+  animation: waveHand 2.2s ease-in-out infinite;
   transform-origin: 70% 70%;
+}
+
+    .wave:hover {
+  animation-duration: 0.8s;
 }
 
 @keyframes waveHand {
