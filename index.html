@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
   <base target="_top">
 
   <!-- Primary Meta Tags -->
@@ -44,41 +43,24 @@
     --card-radius: 24px;
   }
 
-    html {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-}
-
-    * {
-  box-sizing: border-box;
-}
-
-
-    
-body {
-  background:
-    radial-gradient(circle at top right, rgba(245,196,81,0.12), transparent 30%),
-    radial-gradient(circle at bottom left, rgba(245,196,81,0.08), transparent 25%),
-    var(--bg-main);
-
-  font-family: 'Plus Jakarta Sans', sans-serif;
-
-  min-height: 100vh;
-  margin: 0;
-  padding: 20px 16px 80px;
-
-  color: var(--text);
-
-  display: block; /* 🔥 penting: stop flex center */
-  overflow-x: hidden;
-}
+  body {
+    background:
+      radial-gradient(circle at top right, rgba(245,196,81,0.12), transparent 30%),
+      radial-gradient(circle at bottom left, rgba(245,196,81,0.08), transparent 25%),
+      var(--bg-main);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px 20px 60px;
+    color: var(--text);
+  }
 
   .app-shell {
     width: 100%;
     max-width: 480px;
-  margin: 0 auto;
-    min-height: 100vh;
-
     animation: fadeIn 0.6s ease;
   }
 
@@ -329,38 +311,7 @@ select:-webkit-autofill {
 .app-footer small {
   opacity: 0.85;
 }
-
-
-
-    @media (max-width: 480px) {
-
-  .bento-card {
-    padding: 18px;
-    border-radius: 18px;
-  }
-
-  .bento-header {
-    padding: 25px 18px;
-  }
-
-  .menu-item {
-    padding: 18px;
-  }
-
-  .menu-icon {
-    font-size: 2rem;
-  }
-
-  .btn-jef {
-    padding: 12px;
-    font-size: 14px;
-  }
-
-  input, .form-control {
-    font-size: 14px;
-  }
-
-}
+    
 </style>
 </head>
 <body>
@@ -435,63 +386,20 @@ select:-webkit-autofill {
   <div id="pagePlan" class="page">
     <div class="bento-card">
       <h6 class="fw-bold mb-4 text-center">
-        Buat Daftar Log Book Hari Ini
-      </h6>
-      
-      <div class="d-flex justify-content-between align-items-center mb-4 px-1">
-        <div class="small text-muted">
-          <i class="bi bi-calendar-event me-1"></i>
-          <span id="currentDate"></span>
-        </div>
-      
-        <div class="small text-muted">
-          <i class="bi bi-clock me-1"></i>
-          <span id="liveClock"></span>
-        </div>
-      </div>
-      
+  Buat Daftar Log Book Hari Ini
+</h6>
       <div class="row g-2 mb-4">
-        <div class="col-12"><label class="small fw-semibold mb-2">Nama Karyawan</label><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
-        <div class="col-6"><label class="small fw-semibold mb-2">Jabatan / Posisi</label><input type="text" id="disPos" class="form-control bg-light" readonly></div>
-        <div class="col-6"><label class="small fw-semibold mb-2">Departemen / Divisi</label><input type="text" id="disDiv" class="form-control bg-light" readonly></div>
-        <div class="col-12 mt-2"><label class="small fw-semibold mb-2">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
+        <div class="col-12"><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
+        <div class="col-6"><input type="text" id="disPos" class="form-control bg-light" readonly></div>
+        <div class="col-6"><input type="text" id="disDiv" class="form-control bg-light" readonly></div>
+        <div class="col-12 mt-2"><label class="small fw-bold mb-1">Kamu Datang Jam Berapa Hari Ini ?</label><input type="time" id="clockIn" class="form-control"></div>
       </div>
-      
-<div id="planContainer">
-
-  <!-- Default Field (Tidak bisa dihapus) -->
-  <div class="row g-2 mb-2 task-row">
-    
-    <div class="col-5">
-      <input 
-        type="text" 
-        class="form-control tn shadow-sm" 
-        placeholder="Isi task / activity"
-      >
-    </div>
-
-    <div class="col-5">
-      <input 
-        type="text" 
-        class="form-control tt shadow-sm" 
-        placeholder="Isi target dari task"
-      >
-    </div>
-
-    <div class="col-2">
-      <button 
-        type="button"
-        class="btn btn-dark w-100 h-100"
-        disabled
-      >
-        <i class="bi bi-dash-lg"></i>
-      </button>
-    </div>
-
-  </div>
-
-</div>
-      
+      <div id="planContainer">
+        <div class="input-group mb-2 shadow-sm overflow-hidden">
+          <input type="text" class="form-control border-0 tn" placeholder="Isi task / activity">
+          <input type="text" class="form-control border-0 tt" placeholder="Isi target dari task">
+        </div>
+      </div>
       <button class="btn btn-sm btn-outline-dark border-0 fw-bold mt-2" onclick="addPlanField()">+ Tambahkan Task</button>
       <button class="btn btn-jef mt-4" onclick="submitPlan()">Buat Log Book</button>
       <button class="btn btn-link w-100 text-muted btn-sm mt-2" onclick="nav('pageMenu')">Kembali ke Menu</button>
@@ -527,11 +435,10 @@ select:-webkit-autofill {
 
   
 <!-- Bagian HTML & CSS tetap sama seperti milik Anda -->
-<!-- Bagian HTML & CSS tetap sama seperti milik Anda -->
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxs-aDTgSqaj3Hp8Az120Fdt2y9QMpONYS_nAeroCJHO2eaDhS4I20nxEya-G1mdX-8xg/exec";
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbz9gLvqinf4E0sfRMaKlglH8bii87sJgT5j83A94FGuGczekVciKVyKueq2UXBqFuXdfg/exec";
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -555,9 +462,9 @@ select:-webkit-autofill {
   async function doLogin() {
     const u = document.getElementById('u').value;
     const p = document.getElementById('p').value;
-    if(!u || !p) return Swal.fire('Error', 'Input credentials', 'warning');
+    if(!u || !p) return Swal.fire('Oops!', 'Lengkapi kredensial login terlebih dahulu.', 'warning');
     
-    loader('Authenticating...');
+    loader('Proses Autentifikasi...');
     const res = await callAPI({ action: 'checkLogin', u, p });
     Swal.close();
     if(res.success) { 
@@ -570,7 +477,7 @@ select:-webkit-autofill {
   }
 
   async function showPlan() {
-    loader('Fetching Profile...');
+    loader('Memuat profil...');
     const p = await callAPI({ action: 'getUserProfile', username: user });
     Swal.close();
     document.getElementById('disName').value = user;
@@ -590,9 +497,9 @@ select:-webkit-autofill {
     document.querySelectorAll('.tn').forEach((el, i) => {
       if(el.value) tasks.push({ name: el.value, target: document.querySelectorAll('.tt')[i].value });
     });
-    if(tasks.length === 0) return Swal.fire('Wait', 'Add at least 1 task', 'warning');
+    if(tasks.length === 0) return Swal.fire('Oops!', 'Setidaknya harus ada 1 tugas.', 'warning');
     
-    loader('Saving Plan...');
+    loader('Sedang menyimpan task...');
     const data = {
       name: user, position: document.getElementById('disPos').value, division: document.getElementById('disDiv').value,
       clockIn: document.getElementById('clockIn').value, date: new Date().toISOString().split('T')[0],
@@ -604,10 +511,10 @@ select:-webkit-autofill {
   }
 
   async function showReport() {
-    loader('Syncing Tasks...');
+    loader('Sedang menyinkronkan data...');
     const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
-    if(tasks.length === 0) return Swal.fire('Info', 'No active plan for today.', 'info');
+    if(tasks.length === 0) return Swal.fire('Info', 'Tidak ada task aktif untuk hari ini.', 'info');
     let h = '';
     tasks.forEach(t => {
       h += `<div class="bento-card mb-3 bg-light" data-row="${t.row}" style="padding: 15px; border-radius: 16px;">
@@ -641,6 +548,20 @@ select:-webkit-autofill {
     Swal.fire('Great!', res.message, 'success'); 
     nav('pageMenu');
   }
+
+function togglePassword() {
+  const input = document.getElementById('p');
+  const icon = document.querySelector('.toggle-password i');
+
+  if (input.type === 'password') {
+    input.type = 'text';
+    icon.className = 'bi bi-eye-slash-fill';
+  } else {
+    input.type = 'password';
+    icon.className = 'bi bi-eye-fill';
+  }
+}
+  
 </script>
 
   
