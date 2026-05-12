@@ -578,7 +578,7 @@ function addPlanField() {
     loader('Sedang menyimpan task...');
     const data = {
       name: user, position: document.getElementById('disPos').value, division: document.getElementById('disDiv').value,
-      clockIn: document.getElementById('clockIn').value, date: new Date().toISOString().split('T')[0],
+      clockIn: document.getElementById('clockIn').value, date: new Date().toLocaleDateString('sv-SE'),
       tasks: JSON.stringify(tasks)
     };
     const res = await callAPI({ action: 'savePlan', data });
