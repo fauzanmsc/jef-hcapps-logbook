@@ -350,14 +350,13 @@ button.swal2-styled {
 
 
     .modern-check {
-  display: flex;
+    display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  background: rgba(31,31,31,0.85);
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: rgba(31,31,31,0.75);
   border: 1px solid rgba(245,196,81,0.15);
-  transition: 0.2s ease;
 }
 
 .modern-check:hover {
@@ -376,6 +375,7 @@ button.swal2-styled {
   cursor: pointer;
   margin: 0;
 }
+    
     
   .menu-icon {
     font-size: 2.5rem;
@@ -445,6 +445,24 @@ button.swal2-styled {
     color: #111 !important;
   }
 
+    .report-scroll {
+  max-height: 55vh;
+  overflow-y: auto;
+  scroll-behavior: smooth;
+  padding-right: 6px;
+}
+
+/* Hide scrollbar Chrome/Safari/Edge */
+.report-scroll::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Hide scrollbar Firefox */
+.report-scroll {
+  scrollbar-width: none;
+}
+    
   .btn-link {
     color: #c9c9c9 !important;
   }
@@ -785,12 +803,12 @@ select:-webkit-autofill {
   <div id="pageReport" class="page">
     <div class="bento-card p-0 overflow-hidden">
       <div class="p-4 border-bottom bg-primary text-white">
-        <h6 class="mb-0 fw-bold">Progress Report</h6>
+        <h6 class="mb-0 fw-bold">Silahkan Isi Laporan LogBook</h6>
       </div>
-      <div class="p-4" style="max-height: 450px; overflow-y: auto;">
-        <div id="reportContainer"></div>
-        <textarea id="genNote" class="form-control mt-3" placeholder="Catatan tambahan..."></textarea>
-      </div>
+      <div class="p-4 report-scroll">
+  <div id="reportContainer"></div>
+  
+</div>
       <div class="p-4 border-top bg-light">
         <button class="btn btn-jef w-100 fw-bold p-3 rounded-4" onclick="finalReport()">
   Kirim Report
@@ -978,28 +996,34 @@ async function showReport() {
 </div>
           
           <div class="col-12 mt-2">
-            <input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib) *">
+            <input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib)*">
           </div>
           <div class="col-12">
-            <input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Wajib) *">
+            <input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Opsional)">
           </div>
-          <div class="col-12">
-            
-<div class="col-12 mt-2">
-  <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
-    <i class="bi bi-check2-circle text-warning"></i>
-    Apakah Tugas Selesai? *
-  </label>
 
-  <div class="form-check modern-check">
-    <input class="form-check-input r-c" type="checkbox" id="check3">
-    <label class="form-check-label text-white small" for="check3">
-      Ya, tugas ini sudah selesai
-    </label>
-  </div>
-</div>
-            
+          <div class="col-12 mt-2">
+          
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+          
+              <!-- LABEL KIRI -->
+              <label class="small fw-semibold d-flex align-items-center gap-1 mb-0">
+                <i class="bi bi-check2-circle text-warning"></i>
+                Apakah Tugas Selesai?
+              </label>
+          
+              <!-- CHECKBOX KANAN -->
+              <div class="form-check modern-check m-0">
+                <input class="form-check-input r-c" type="checkbox" id="check3">
+                <label class="form-check-label text-white small" for="check3">
+                  Ya, Selesai
+                </label>
+              </div>
+          
+            </div>
+          
           </div>
+          
         </div>
       </div>`;
     });
