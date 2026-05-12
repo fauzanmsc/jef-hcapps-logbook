@@ -527,10 +527,11 @@ select:-webkit-autofill {
 
   
 <!-- Bagian HTML & CSS tetap sama seperti milik Anda -->
+<!-- Bagian HTML & CSS tetap sama seperti milik Anda -->
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw4z6I58-RoiHlydYcMdIQFqqzirGRrHM96H1_0PMC-0A0_EX6ixbDcM1KxO_nRuCyXvQ/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxs-aDTgSqaj3Hp8Az120Fdt2y9QMpONYS_nAeroCJHO2eaDhS4I20nxEya-G1mdX-8xg/exec";
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -554,9 +555,9 @@ select:-webkit-autofill {
   async function doLogin() {
     const u = document.getElementById('u').value;
     const p = document.getElementById('p').value;
-    if(!u || !p) return Swal.fire('Oops!', 'Lengkapi kredensial login terlebih dahulu.', 'warning');
+    if(!u || !p) return Swal.fire('Error', 'Input credentials', 'warning');
     
-    loader('Proses Autentifikasi...');
+    loader('Authenticating...');
     const res = await callAPI({ action: 'checkLogin', u, p });
     Swal.close();
     if(res.success) { 
@@ -564,12 +565,12 @@ select:-webkit-autofill {
       document.getElementById('userLabel').innerText = user; 
       nav('pageMenu'); 
     } else { 
-      Swal.fire('Login Gagal', 'Username atau password yang dimasukkan salah.', 'error');
+      Swal.fire('Error', 'Wrong Password/Username', 'error'); 
     }
   }
 
   async function showPlan() {
-    loader('Memuat logbook...');
+    loader('Fetching Profile...');
     const p = await callAPI({ action: 'getUserProfile', username: user });
     Swal.close();
     document.getElementById('disName').value = user;
@@ -578,57 +579,23 @@ select:-webkit-autofill {
     document.getElementById('clockIn').value = new Date().toTimeString().slice(0,5);
     nav('pagePlan');
   }
-  
 
-function addPlanField() {
-  const html = `
-    <div class="row g-2 mb-2 task-row animate__animated animate__fadeInUp">
-      
-      <div class="col-5">
-        <input 
-          type="text" 
-          class="form-control tn shadow-sm" 
-          placeholder="Isi task / activity"
-        >
-      </div>
-
-      <div class="col-5">
-        <input 
-          type="text" 
-          class="form-control tt shadow-sm" 
-          placeholder="Isi target dari task"
-        >
-      </div>
-
-      <div class="col-2">
-        <button 
-          type="button"
-          class="btn btn-outline-danger w-100 h-100"
-          onclick="removeTask(this)"
-        >
-          <i class="bi bi-trash3-fill"></i>
-        </button>
-      </div>
-
-    </div>
-  `;
-
-  document
-    .getElementById('planContainer')
-    .insertAdjacentHTML('beforeend', html);
-}
+  function addPlanField() {
+    const html = `<div class="input-group mb-2 shadow-sm rounded-3 overflow-hidden animate__animated animate__fadeInUp"><input type="text" class="form-control border-0 tn" placeholder="Tugas"><input type="text" class="form-control border-0 tt" placeholder="Target"></div>`;
+    document.getElementById('planContainer').insertAdjacentHTML('beforeend', html);
+  }
 
   async function submitPlan() {
     let tasks = [];
     document.querySelectorAll('.tn').forEach((el, i) => {
       if(el.value) tasks.push({ name: el.value, target: document.querySelectorAll('.tt')[i].value });
     });
-    if(tasks.length === 0) return Swal.fire('Oops!', 'Setidaknya harus ada 1 tugas.', 'warning');
+    if(tasks.length === 0) return Swal.fire('Wait', 'Add at least 1 task', 'warning');
     
-    loader('Sedang menyimpan task...');
+    loader('Saving Plan...');
     const data = {
       name: user, position: document.getElementById('disPos').value, division: document.getElementById('disDiv').value,
-      clockIn: document.getElementById('clockIn').value, date: new Date().toLocaleDateString('sv-SE'),
+      clockIn: document.getElementById('clockIn').value, date: new Date().toISOString().split('T')[0],
       tasks: JSON.stringify(tasks)
     };
     const res = await callAPI({ action: 'savePlan', data });
@@ -636,8 +603,7 @@ function addPlanField() {
     nav('pageMenu');
   }
 
-////
-async function showReport() {
+  async function showReport() {
     loader('Syncing Tasks...');
     const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
@@ -675,65 +641,6 @@ async function showReport() {
     Swal.fire('Great!', res.message, 'success'); 
     nav('pageMenu');
   }
-
-  ///
-
-
-  
-function togglePassword() {
-  const input = document.getElementById('p');
-  const icon = document.querySelector('.toggle-password i');
-
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.className = 'bi bi-eye-slash-fill';
-  } else {
-    input.type = 'password';
-    icon.className = 'bi bi-eye-fill';
-  }
-}
-
-function updateDateTime() {
-  const now = new Date();
-
-  const dateOptions = {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  };
-
-  const currentDate = now.toLocaleDateString('id-ID', dateOptions);
-
-  const currentTime = now.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
-
-  document.getElementById('currentDate').innerText = currentDate;
-  document.getElementById('liveClock').innerText = currentTime;
-}
-
-updateDateTime();
-setInterval(updateDateTime, 1000);
-
-function removeTask(button) {
-  const totalTask = document.querySelectorAll('.task-row').length;
-
-  // Minimal 1 field tersisa
-  if (totalTask <= 1) {
-    Swal.fire(
-      'Oops!',
-      'Minimal harus ada 1 task.',
-      'warning'
-    );
-    return;
-  }
-
-  button.closest('.task-row').remove();
-}
-  
 </script>
 
   
