@@ -148,11 +148,34 @@ body {
 
 #pageReport .bento-card {
   width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
 }
 
-    #reportContainer {
-  max-height: 350px;
+    #pageReport .border-top {
+  position: sticky;
+  bottom: 0;
+  background: rgba(20,20,20,0.95) !important;
+  backdrop-filter: blur(10px);
+}
+
+ #reportContainer {
+  max-height: 55vh;
   overflow-y: auto;
+  padding-right: 6px;
+  scroll-behavior: smooth;
+}
+
+/* Hide scrollbar (Chrome, Edge, Safari) */
+#reportContainer::-webkit-scrollbar {
+  width: 0px;
+  background: transparent;
+}
+
+/* Hide scrollbar (Firefox) */
+#reportContainer {
+  scrollbar-width: none;
 }
 
   
@@ -325,6 +348,35 @@ button.swal2-styled {
       0 12px 30px rgba(245,196,81,0.18);
   }
 
+
+    .modern-check {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(31,31,31,0.85);
+  border: 1px solid rgba(245,196,81,0.15);
+  transition: 0.2s ease;
+}
+
+.modern-check:hover {
+  border-color: rgba(245,196,81,0.4);
+  transform: translateY(-1px);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+}
+
+.modern-check .form-check-input {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.modern-check .form-check-label {
+  cursor: pointer;
+  margin: 0;
+}
+    
   .menu-icon {
     font-size: 2.5rem;
     margin-bottom: 10px;
@@ -365,6 +417,10 @@ button.swal2-styled {
     background: #333333;
     color: white;
   }
+
+  .time-box input.text-center {
+  text-align: center;
+}
 
   .bg-light {
     background: #202020 !important;
@@ -659,16 +715,24 @@ select:-webkit-autofill {
         <div class="col-6"><label class="small fw-semibold mb-2">Departemen / Divisi</label><input type="text" id="disDiv" class="form-control bg-light" readonly></div>
 
         <div class="col-12 mt-2">
-          <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
-            <i class="bi bi-geo-alt-fill text-warning"></i>
-            Kamu Datang Jam Berapa Hari Ini ?
-          </label>
-        
-          <div class="time-box">
-            <i class="bi bi-clock text-warning"></i>
-            <input type="text" id="clockIn" class="form-control timepicker" placeholder="00:00">
-          </div>
-        </div>
+  
+  <div class="d-flex align-items-center justify-content-between gap-3">
+
+    <!-- LEFT LABEL -->
+    <label class="small fw-semibold d-flex align-items-center gap-1 mb-0">
+      <i class="bi bi-geo-alt-fill text-warning"></i>
+      <span>Kedatangan Hari Ini</span>
+    </label>
+
+    <!-- RIGHT INPUT -->
+    <div class="time-box flex-grow-0" style="width: 120px;">
+      <i class="bi bi-clock text-warning"></i>
+      <input type="text" id="clockIn" class="form-control timepicker text-center" placeholder="00:00">
+    </div>
+
+  </div>
+
+</div>
         
       </div>
       
@@ -915,16 +979,28 @@ async function showReport() {
             <input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Wajib) *">
           </div>
           <div class="col-12">
-            <div class="form-check form-switch mt-2">
-              <input class="form-check-input r-c" type="checkbox" id="check${t.row}">
-              <label class="form-check-label small fw-bold text-white" for="check${t.row}">Konfirmasi Selesai *</label>
-            </div>
+            
+<div class="col-12 mt-2">
+  <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
+    <i class="bi bi-check2-circle text-warning"></i>
+    Apakah Tugas Selesai? *
+  </label>
+
+  <div class="form-check modern-check">
+    <input class="form-check-input r-c" type="checkbox" id="check3">
+    <label class="form-check-label text-white small" for="check3">
+      Ya, tugas ini sudah selesai
+    </label>
+  </div>
+</div>
+            
           </div>
         </div>
       </div>`;
     });
     
     document.getElementById('reportContainer').innerHTML = h;
+    initTimePicker();
     nav('pageReport');
     
   } catch (err) {
@@ -1102,35 +1178,19 @@ function confirmExit() {
   });
 }
 
- const fp = flatpickr(".timepicker", {
-  enableTime: true,
-  noCalendar: true,
-  dateFormat: "H:i",
-  time_24hr: true,
-  minuteIncrement: 5,
-  disableMobile: true
-});
-
-// klik seluruh box = buka picker
-document.querySelectorAll(".time-trigger").forEach(el => {
-  el.addEventListener("click", function () {
-    const input = this.querySelector("input");
-    input._flatpickr.open();
-  });
-});
 
   function initTimePicker() {
   document.querySelectorAll(".timepicker").forEach(el => {
-    if (!el._flatpickr) {
-      flatpickr(el, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: "H:i",
-        time_24hr: true,
-        minuteIncrement: 5,
-        disableMobile: true
-      });
-    }
+    if (el._flatpickr) return;
+
+    flatpickr(el, {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      minuteIncrement: 5,
+      disableMobile: true
+    });
   });
 }
 
