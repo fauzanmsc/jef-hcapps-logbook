@@ -530,7 +530,7 @@ select:-webkit-autofill {
 
 <script>
   // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbymT4FQamC7ondYazdQDKAicZTMxci6yccebPSj-Du_6cUdqpWTJDQbPH9gq2Un-f6syA/exec"; //UBAH URL
+  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbw52Qg4vlgbkZ6dpbKDKLk7u1yvl45zpxeLV9QBOt_WyrL3A8Ac6KlWbaWpEAE-WG9WCw/exec"; //UBAH URL
   let user = "";
 
   // Fungsi helper untuk hit API
@@ -638,49 +638,59 @@ function addPlanField() {
 
 ////
 async function showReport() {
-  loader('Sinkronisasi Tugas...');
+  loader('Memeriksa tugas aktif...');
   try {
     const tasks = await callAPI({ action: 'getActiveTasks', username: user });
     Swal.close();
     
     if (!tasks || tasks.length === 0) {
-      return Swal.fire('Info', 'Tidak ada rencana tugas aktif untuk hari ini yang perlu dilaporkan.', 'info');
+      return Swal.fire({
+        title: 'Tugas Tidak Ditemukan',
+        text: `Tidak ada tugas untuk "${user}" pada tanggal hari ini yang statusnya (Kolom M) masih kosong.`,
+        icon: 'info'
+      });
     }
 
     let h = '';
     tasks.forEach(t => {
       h += `
-      <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding: 15px; border-radius: 16px; border-left: 5px solid #f5c451;">
-        <p class="mb-1 fw-bold text-white small">${t.task}</p>
-        <p class="text-muted mb-3" style="font-size: 11px;">Target: ${t.target}</p>
+      <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding: 18px; border-radius: 16px; border-left: 6px solid #f5c451;">
+        <div class="mb-2">
+          <span class="badge bg-primary text-dark mb-1">TASK</span>
+          <p class="mb-1 fw-bold text-white small">${t.task}</p>
+          <small class="text-muted d-block mb-3">Target: ${t.target}</small>
+        </div>
+        
         <div class="row g-2">
           <div class="col-6">
-            <label class="text-muted" style="font-size: 10px;">Jam Mulai *</label>
+            <label class="text-muted small mb-1">Jam Mulai *</label>
             <input type="time" class="form-control form-control-sm r-start">
           </div>
           <div class="col-6">
-            <label class="text-muted" style="font-size: 10px;">Jam Selesai *</label>
+            <label class="text-muted small mb-1">Jam Selesai *</label>
             <input type="time" class="form-control form-control-sm r-end">
           </div>
-          <div class="col-12">
-            <input type="text" class="form-control form-control-sm r-out" placeholder="Isi Output Hasil (Wajib) *">
+          <div class="col-12 mt-2">
+            <input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib) *">
           </div>
           <div class="col-12">
-            <input type="text" class="form-control form-control-sm r-iss" placeholder="Isi Kendala/Issue (Wajib) *">
+            <input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Wajib) *">
           </div>
           <div class="col-12">
-            <div class="form-check form-switch mt-1">
+            <div class="form-check form-switch mt-2">
               <input class="form-check-input r-c" type="checkbox" id="check${t.row}">
-              <label class="form-check-label small fw-bold text-white" for="check${t.row}">Tugas Selesai? *</label>
+              <label class="form-check-label small fw-bold text-white" for="check${t.row}">Konfirmasi Selesai *</label>
             </div>
           </div>
         </div>
       </div>`;
     });
+    
     document.getElementById('reportContainer').innerHTML = h;
     nav('pageReport');
+    
   } catch (err) {
-    Swal.fire('Error', 'Gagal memuat data: ' + err.toString(), 'error');
+    Swal.fire('System Error', err.toString(), 'error');
   }
 }
 
