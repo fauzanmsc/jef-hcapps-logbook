@@ -386,8 +386,21 @@ select:-webkit-autofill {
   <div id="pagePlan" class="page">
     <div class="bento-card">
       <h6 class="fw-bold mb-4 text-center">
-  Buat Daftar Log Book Hari Ini
-</h6>
+        Buat Daftar Log Book Hari Ini
+      </h6>
+      
+      <div class="d-flex justify-content-between align-items-center mb-4 px-1">
+        <div class="small text-muted">
+          <i class="bi bi-calendar-event me-1"></i>
+          <span id="currentDate"></span>
+        </div>
+      
+        <div class="small text-muted">
+          <i class="bi bi-clock me-1"></i>
+          <span id="liveClock"></span>
+        </div>
+      </div>
+      
       <div class="row g-2 mb-4">
         <div class="col-12"><input type="text" id="disName" class="form-control bg-light mb-2" readonly></div>
         <div class="col-6"><input type="text" id="disPos" class="form-control bg-light" readonly></div>
@@ -477,7 +490,7 @@ select:-webkit-autofill {
   }
 
   async function showPlan() {
-    loader('Memuat profil...');
+    loader('Memuat logbook...');
     const p = await callAPI({ action: 'getUserProfile', username: user });
     Swal.close();
     document.getElementById('disName').value = user;
@@ -561,6 +574,31 @@ function togglePassword() {
     icon.className = 'bi bi-eye-fill';
   }
 }
+
+function updateDateTime() {
+  const now = new Date();
+
+  const dateOptions = {
+    weekday: 'long',
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  };
+
+  const currentDate = now.toLocaleDateString('id-ID', dateOptions);
+
+  const currentTime = now.toLocaleTimeString('id-ID', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  });
+
+  document.getElementById('currentDate').innerText = currentDate;
+  document.getElementById('liveClock').innerText = currentTime;
+}
+
+updateDateTime();
+setInterval(updateDateTime, 1000);
   
 </script>
 
