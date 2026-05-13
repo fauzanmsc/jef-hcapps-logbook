@@ -58,6 +58,38 @@
   box-sizing: border-box;
 }
 
+    .logo-zoom {
+  /* Durasi 5 detik agar gerakan tidak terburu-buru */
+  animation: smoothZoom 5s ease-in-out infinite;
+  filter: drop-shadow(0 0 10px rgba(245, 196, 81, 0.3));
+  will-change: transform; /* Optimasi performa browser */
+}
+
+@keyframes smoothZoom {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(245, 196, 81, 0.3));
+  }
+  50% {
+    /* Zoom in sedikit (1.1x) */
+    transform: scale(1.1);
+    /* Glow sedikit menguat saat membesar */
+    filter: drop-shadow(0 0 20px rgba(245, 196, 81, 0.6));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 10px rgba(245, 196, 81, 0.3));
+  }
+}
+
+/* Efek hover interaktif */
+.logo-zoom:hover {
+  animation-play-state: paused; /* Berhenti sejenak saat disentuh */
+  cursor: pointer;
+  transform: scale(1.15);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
     .wave {
   display: inline-block;
   animation: waveHand 2.2s ease-in-out infinite;
@@ -675,7 +707,7 @@ select:-webkit-autofill {
       <img 
         src="/jef-logomark.png" 
         alt="JEF Logo"
-        class="mb-2 logo-anim" 
+        class="mb-2 logo-zoom" 
         style="max-width: 80px; height: auto;"
       >
       <h3 class="fw-bold mb-0">JEF WEB APPS</h3>
