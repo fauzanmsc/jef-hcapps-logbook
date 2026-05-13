@@ -967,7 +967,7 @@ select:-webkit-autofill {
    CONFIG
 ========================================= */
 const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbzqV0yfZ2ZMs5GR_mPKTHL0bspkYztyUmzLod1EQ_wLszHhSvFZ8UC1YlGMzYssUNw73w/exec";
+  "https://script.google.com/macros/s/AKfycbwf3AXspSo3tyqi_6N7O1b_bhv2Y_NjqV1bewbFM2erxz26YHZO5Vt6ReEwdiErze-u1w/exec"; ////UBAH URL
 
 let user = "";
 let deferredPrompt = null;
@@ -976,11 +976,13 @@ let deferredPrompt = null;
 /* =========================================
    HELPER API
 ========================================= */
-async function callAPI(payload) {
-  const response = await fetch(WEB_APP_URL, {
-    method: "POST",
-    body: JSON.stringify(payload)
-  });
+const response = await fetch(WEB_APP_URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(payload)
+});
 
   return await response.json();
 }
@@ -1043,21 +1045,23 @@ async function doLogin() {
     Swal.close();
 
     if (res.success) {
-      localStorage.setItem("jef_user_logged", res.username);
-      localStorage.setItem("jef_user_name", res.name);
 
-      user = res.username;
+  Swal.fire(
+    "Success",
+    res.message,
+    "success"
+  );
 
-      document.getElementById("userLabel").innerText = res.name;
+} else {
 
-      nav("pageMenu");
-    } else {
-      Swal.fire(
-        "Login Gagal",
-        "Username atau password salah.",
-        "error"
-      );
-    }
+  Swal.fire(
+    "Error",
+    res.error || "Gagal menyimpan data",
+    "error"
+  );
+
+  return;
+}
 
   } catch (err) {
     Swal.close();
