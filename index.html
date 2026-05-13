@@ -9,6 +9,7 @@
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="JEF LOGBOOK">
   
@@ -962,92 +963,184 @@ select:-webkit-autofill {
 <!-- Bagian HTML & CSS tetap sama seperti milik Anda -->
 
 <script>
-  // GANTI DENGAN URL WEB APP ANDA DARI GOOGLE DEPLOYMENT
-  const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzqV0yfZ2ZMs5GR_mPKTHL0bspkYztyUmzLod1EQ_wLszHhSvFZ8UC1YlGMzYssUNw73w/exec"; //UBAH URL
-  let user = "";
+/* =========================================
+   CONFIG
+========================================= */
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbzqV0yfZ2ZMs5GR_mPKTHL0bspkYztyUmzLod1EQ_wLszHhSvFZ8UC1YlGMzYssUNw73w/exec";
 
-  // Fungsi helper untuk hit API
-  async function callAPI(payload) {
-    const response = await fetch(WEB_APP_URL, {
-      method: 'POST',
-      body: JSON.stringify(payload)
+let user = "";
+let deferredPrompt = null;
+
+
+/* =========================================
+   HELPER API
+========================================= */
+async function callAPI(payload) {
+  const response = await fetch(WEB_APP_URL, {
+    method: "POST",
+    body: JSON.stringify(payload)
+  });
+
+  return await response.json();
+}
+
+
+/* =========================================
+   NAVIGATION
+========================================= */
+function nav(id) {
+  document.querySelectorAll(".page").forEach((p) => {
+    p.classList.remove("active");
+    p.style.display = "none";
+  });
+
+  const active = document.getElementById(id);
+
+  if (active) {
+    active.classList.add("active");
+    active.style.display = "flex";
+  }
+}
+
+
+/* =========================================
+   LOADER
+========================================= */
+function loader(text = "Loading...") {
+  Swal.fire({
+    title: text,
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading()
+  });
+}
+
+
+/* =========================================
+   LOGIN
+========================================= */
+async function doLogin() {
+  const u = document.getElementById("u").value.trim();
+  const p = document.getElementById("p").value.trim();
+
+  if (!u || !p) {
+    return Swal.fire(
+      "Oops!",
+      "Lengkapi kredensial login terlebih dahulu.",
+      "warning"
+    );
+  }
+
+  try {
+    loader("Proses Autentifikasi...");
+
+    const res = await callAPI({
+      action: "checkLogin",
+      u,
+      p
     });
-    return await response.json();
-  }
 
-  function nav(id) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.getElementById(id).classList.add('active');
-  }
+    Swal.close();
 
-  function loader(text = 'Loading...') {
-    Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
-  }
+    if (res.success) {
+      localStorage.setItem("jef_user_logged", res.username);
+      localStorage.setItem("jef_user_name", res.name);
 
-  ////// DoLOGIN
-  
-  async function doLogin() {
-  const u = document.getElementById('u').value;
-  const p = document.getElementById('p').value;
-  if(!u || !p) return Swal.fire('Oops!', 'Lengkapi kredensial login terlebih dahulu.', 'warning');
-  
-  loader('Proses Autentifikasi...');
-  const res = await callAPI({ action: 'checkLogin', u, p });
-  Swal.close();
+      user = res.username;
 
-  if(res.success) { 
-    // SIMPAN KE STORAGE
-    localStorage.setItem('jef_user_logged', res.username);
-    localStorage.setItem('jef_user_name', res.name);
-    
-    user = res.username;
-    document.getElementById('userLabel').innerText = res.name;
-    nav('pageMenu'); 
+      document.getElementById("userLabel").innerText = res.name;
 
-  } else { 
-    Swal.fire('Login Gagal', 'Username atau password salah.', 'error');
+      nav("pageMenu");
+    } else {
+      Swal.fire(
+        "Login Gagal",
+        "Username atau password salah.",
+        "error"
+      );
+    }
+
+  } catch (err) {
+    Swal.close();
+
+    console.error(err);
+
+    Swal.fire(
+      "System Error",
+      "Gagal terhubung ke server.",
+      "error"
+    );
   }
 }
-/////////
-  async function showPlan() {
-  loader('Memuat logbook...');
-  const p = await callAPI({ action: 'getUserProfile', username: user });
 
-  Swal.close();
 
-  document.getElementById('disName').value = user;
-  document.getElementById('disPos').value = p.position;
-  document.getElementById('disDiv').value = p.division;
-  document.getElementById('clockIn').value = new Date().toTimeString().slice(0,5);
+/* =========================================
+   SHOW PLAN
+========================================= */
+async function showPlan() {
 
-  nav('pagePlan');
+  try {
 
-  initTimePicker(); // ⬅️ PENTING
+    loader("Memuat logbook...");
+
+    const p = await callAPI({
+      action: "getUserProfile",
+      username: user
+    });
+
+    Swal.close();
+
+    document.getElementById("disName").value = user;
+    document.getElementById("disPos").value = p.position || "-";
+    document.getElementById("disDiv").value = p.division || "-";
+
+    document.getElementById("clockIn").value =
+      new Date().toTimeString().slice(0, 5);
+
+    nav("pagePlan");
+
+    initTimePicker();
+
+  } catch (err) {
+
+    Swal.close();
+
+    console.error(err);
+
+    Swal.fire(
+      "Error",
+      "Gagal memuat data profile.",
+      "error"
+    );
+  }
 }
-  
 
+
+/* =========================================
+   ADD PLAN FIELD
+========================================= */
 function addPlanField() {
+
   const html = `
-    <div class="row g-2 mb-2 task-row animate__animated animate__fadeInUp">
-      
+    <div class="row g-2 mb-2 task-row">
+
       <div class="col-5">
-        <input 
-          type="text" 
-          class="form-control tn shadow-sm" 
+        <input
+          type="text"
+          class="form-control tn shadow-sm"
           placeholder="Isi task / activity"
         >
       </div>
 
       <div class="col-5">
-        <input 
-          type="text" 
-          class="form-control tt shadow-sm" 
+        <input
+          type="text"
+          class="form-control tt shadow-sm"
           placeholder="Isi target dari task"
         >
       </div>
 
       <div class="col-2">
-        <button 
+        <button
           type="button"
           class="btn btn-outline-secondary w-100 h-100"
           onclick="removeTask(this)"
@@ -1060,144 +1153,273 @@ function addPlanField() {
   `;
 
   document
-    .getElementById('planContainer')
-    .insertAdjacentHTML('beforeend', html);
+    .getElementById("planContainer")
+    .insertAdjacentHTML("beforeend", html);
 }
 
-  async function submitPlan() {
-    let tasks = [];
-    document.querySelectorAll('.tn').forEach((el, i) => {
-      if(el.value) tasks.push({ name: el.value, target: document.querySelectorAll('.tt')[i].value });
-    });
-    if(tasks.length === 0) return Swal.fire('Oops!', 'Setidaknya harus ada 1 tugas.', 'warning');
-    
-    loader('Sedang menyimpan task...');
-    const data = {
-      name: user, position: document.getElementById('disPos').value, division: document.getElementById('disDiv').value,
-      clockIn: document.getElementById('clockIn').value, date: new Date().toLocaleDateString('sv-SE'),
-      tasks: JSON.stringify(tasks)
-    };
-    const res = await callAPI({ action: 'savePlan', data });
-    Swal.fire('Success', res.message, 'success'); 
-    nav('pageMenu');
+
+/* =========================================
+   REMOVE TASK
+========================================= */
+function removeTask(button) {
+
+  const totalTask =
+    document.querySelectorAll(".task-row").length;
+
+  if (totalTask <= 1) {
+
+    Swal.fire(
+      "Oops!",
+      "Minimal harus ada 1 task.",
+      "warning"
+    );
+
+    return;
   }
 
-////
-async function showReport() {
-  loader('Memeriksa tugas aktif...');
+  button.closest(".task-row").remove();
+}
+
+
+/* =========================================
+   SUBMIT PLAN
+========================================= */
+async function submitPlan() {
+
+  let tasks = [];
+
+  document.querySelectorAll(".tn").forEach((el, i) => {
+
+    if (el.value.trim()) {
+
+      tasks.push({
+        name: el.value.trim(),
+        target: document
+          .querySelectorAll(".tt")[i]
+          .value
+          .trim()
+      });
+    }
+  });
+
+  if (tasks.length === 0) {
+    return Swal.fire(
+      "Oops!",
+      "Setidaknya harus ada 1 tugas.",
+      "warning"
+    );
+  }
+
   try {
-    const tasks = await callAPI({ action: 'getActiveTasks', username: user });
+
+    loader("Sedang menyimpan task...");
+
+    const data = {
+      name: user,
+      position: document.getElementById("disPos").value,
+      division: document.getElementById("disDiv").value,
+      clockIn: document.getElementById("clockIn").value,
+      date: new Date().toLocaleDateString("sv-SE"),
+      tasks: JSON.stringify(tasks)
+    };
+
+    const res = await callAPI({
+      action: "savePlan",
+      data
+    });
+
+    Swal.fire(
+      "Success",
+      res.message,
+      "success"
+    );
+
+    nav("pageMenu");
+
+  } catch (err) {
+
     Swal.close();
-    
+
+    console.error(err);
+
+    Swal.fire(
+      "Error",
+      "Gagal menyimpan task.",
+      "error"
+    );
+  }
+}
+
+
+/* =========================================
+   SHOW REPORT
+========================================= */
+async function showReport() {
+
+  try {
+
+    loader("Memeriksa tugas aktif...");
+
+    const tasks = await callAPI({
+      action: "getActiveTasks",
+      username: user
+    });
+
+    Swal.close();
+
     if (!tasks || tasks.length === 0) {
+
       return Swal.fire({
-        title: 'Tugas Tidak Ditemukan',
-        text: `Tidak ada tugas aktif saat ini.`,
-        icon: 'info'
+        title: "Tugas Tidak Ditemukan",
+        text: "Tidak ada tugas aktif saat ini.",
+        icon: "info"
       });
     }
 
-    let h = '';
+    let h = "";
+
     tasks.forEach((t, i) => {
+
       h += `
-      <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding: 18px; border-radius: 16px; border-left: 3px solid #f5c451;">
+      <div class="bento-card mb-3 bg-light report-item"
+           data-row="${t.row}"
+           style="padding:18px;border-radius:16px;border-left:3px solid #f5c451;">
+
         <div class="mb-2">
-         <span class="badge bg-primary text-dark mb-1">TASK ${i + 1}</span>
-          <p class="mb-1 fw-bold text-white small sentence-case">${t.task}</p>
-          <small class="text-muted d-block mb-3 sentence-case">Target: ${t.target}</small>
+          <span class="badge bg-primary text-dark mb-1">
+            TASK ${i + 1}
+          </span>
+
+          <p class="mb-1 fw-bold text-white small sentence-case">
+            ${t.task}
+          </p>
+
+          <small class="text-muted d-block mb-3 sentence-case">
+            Target: ${t.target}
+          </small>
         </div>
-        
+
         <div class="row g-2">
-        
 
-    <div class="col-6">
-  <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
-    <i class="bi bi-play-circle text-warning"></i>
-    Waktu Mulai*
-  </label>
+          <div class="col-6">
+            <label class="small fw-semibold mb-2">
+              Waktu Mulai*
+            </label>
 
-  <div class="time-box">
-    <i class="bi bi-clock text-warning"></i>
-    <input type="text" class="form-control timepicker r-start" placeholder="00:00">
-  </div>
-</div>
-
-<div class="col-6">
-  <label class="small fw-semibold mb-2 d-flex align-items-center gap-1">
-    <i class="bi bi-stop-circle text-warning"></i>
-    Waktu Selesai*
-  </label>
-
-  <div class="time-box">
-    <i class="bi bi-clock-history text-warning"></i>
-    <input type="text" class="form-control timepicker r-end" placeholder="00:00">
-  </div>
-</div>
-          
-          <div class="col-12 mt-2">
-            <input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib)*">
-          </div>
-          <div class="col-12">
-            <input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Opsional)">
-          </div>
-
-          <div class="col-12 mt-2">
-          
-            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
-          
-              <!-- LABEL KIRI -->
-              <label class="small fw-semibold d-flex align-items-center gap-1 mb-0">
-                <i class="bi bi-check2-circle text-warning"></i>
-                Apakah Tugas Selesai?
-              </label>
-          
-              <!-- CHECKBOX KANAN -->
-              <div class="form-check modern-check m-0">
-                <input class="form-check-input r-c" type="checkbox">
-                <label class="form-check-label text-white small">
-                  Ya, Selesai
-                </label>
-              </div>
-          
+            <div class="time-box">
+              <input type="text"
+                     class="form-control timepicker r-start"
+                     placeholder="00:00">
             </div>
-          
           </div>
-          
+
+          <div class="col-6">
+            <label class="small fw-semibold mb-2">
+              Waktu Selesai*
+            </label>
+
+            <div class="time-box">
+              <input type="text"
+                     class="form-control timepicker r-end"
+                     placeholder="00:00">
+            </div>
+          </div>
+
+          <div class="col-12 mt-2">
+            <input type="text"
+                   class="form-control form-control-sm r-out"
+                   placeholder="Output Hasil (Wajib)*">
+          </div>
+
+          <div class="col-12">
+            <input type="text"
+                   class="form-control form-control-sm r-iss"
+                   placeholder="Kendala/Issue (Opsional)">
+          </div>
+
+          <div class="col-12 mt-2">
+
+            <div class="form-check modern-check m-0">
+              <input class="form-check-input r-c"
+                     type="checkbox">
+
+              <label class="form-check-label text-white small">
+                Ya, Selesai
+              </label>
+            </div>
+
+          </div>
+
         </div>
-      </div>`;
+
+      </div>
+      `;
     });
-    
-    document.getElementById('reportContainer').innerHTML = h;
+
+    document.getElementById("reportContainer").innerHTML = h;
+
     initTimePicker();
-    nav('pageReport');
-    
+
+    nav("pageReport");
+
   } catch (err) {
-    Swal.fire('System Error', err.toString(), 'error');
+
+    Swal.close();
+
+    console.error(err);
+
+    Swal.fire(
+      "System Error",
+      err.toString(),
+      "error"
+    );
   }
 }
 
-////FINAL REPORT
+
+/* =========================================
+   FINAL REPORT
+========================================= */
 async function finalReport() {
+
   let reports = [];
   let isAllValid = true;
-  
-  const reportItems = document.querySelectorAll('.report-item');
-  
+
+  const reportItems =
+    document.querySelectorAll(".report-item");
+
   if (reportItems.length === 0) return;
 
-  reportItems.forEach(div => {
-    const startTime = div.querySelector('.r-start').value;
-    const endTime = div.querySelector('.r-end').value;
-    const output = div.querySelector('.r-out').value;
-    const issue = div.querySelector('.r-iss').value;
-    const completed = div.querySelector('.r-c').checked;
+  reportItems.forEach((div) => {
 
-    // Validasi: Jam Mulai, Jam Selesai, Output, dan Checkbox Selesai WAJIB diisi
-    // Issue/Kendala tetap dibiarkan Opsional
-    if (!startTime || !endTime || !output || !completed) {
+    const startTime =
+      div.querySelector(".r-start").value;
+
+    const endTime =
+      div.querySelector(".r-end").value;
+
+    const output =
+      div.querySelector(".r-out").value;
+
+    const issue =
+      div.querySelector(".r-iss").value;
+
+    const completed =
+      div.querySelector(".r-c").checked;
+
+    if (
+      !startTime ||
+      !endTime ||
+      !output ||
+      !completed
+    ) {
+
       isAllValid = false;
-      div.style.border = "2px solid #ff4d4d"; 
+
+      div.style.border = "2px solid #ff4d4d";
+
     } else {
+
       div.style.border = "none";
       div.style.borderLeft = "5px solid #f5c451";
     }
@@ -1207,239 +1429,297 @@ async function finalReport() {
       startTime,
       endTime,
       output,
-      issue: issue || "-", 
+      issue: issue || "-",
       completed
     });
   });
 
   if (!isAllValid) {
-    return Swal.fire('Oops!', 'Mohon lengkapi Jam, Output, dan centang "Ya, Selesai" di setiap tugas.', 'warning');
-  }
 
-  loader('Mengirim Report...');
+    return Swal.fire(
+      "Oops!",
+      'Mohon lengkapi Jam, Output, dan centang "Ya, Selesai".',
+      "warning"
+    );
+  }
 
   try {
-    const res = await callAPI({ 
-      action: 'submitReport', 
-      data: { 
-        reports: JSON.stringify(reports), 
-        note: "" // PERUBAHAN DI SINI: Kita kirim string kosong secara manual
-      } 
+
+    loader("Mengirim Report...");
+
+    const res = await callAPI({
+      action: "submitReport",
+      data: {
+        reports: JSON.stringify(reports),
+        note: ""
+      }
     });
-    
+
     Swal.fire({
-      title: 'Berhasil',
+      title: "Berhasil",
       text: res.message,
-      icon: 'success',
-      confirmButtonColor: '#f5c451'
-    }); 
-    nav('pageMenu');
+      icon: "success",
+      confirmButtonColor: "#f5c451"
+    });
+
+    nav("pageMenu");
+
   } catch (err) {
+
     Swal.close();
-    Swal.fire('Error', 'Gagal mengirim laporan ke server.', 'error');
+
     console.error(err);
+
+    Swal.fire(
+      "Error",
+      "Gagal mengirim laporan ke server.",
+      "error"
+    );
   }
 }
-////////
 
 
-  
+/* =========================================
+   PASSWORD TOGGLE
+========================================= */
 function togglePassword() {
-  const input = document.getElementById('p');
-  const icon = document.querySelector('.toggle-password i');
 
-  if (input.type === 'password') {
-    input.type = 'text';
-    icon.className = 'bi bi-eye-slash-fill';
+  const input = document.getElementById("p");
+
+  const icon =
+    document.querySelector(".toggle-password i");
+
+  if (input.type === "password") {
+
+    input.type = "text";
+    icon.className = "bi bi-eye-slash-fill";
+
   } else {
-    input.type = 'password';
-    icon.className = 'bi bi-eye-fill';
+
+    input.type = "password";
+    icon.className = "bi bi-eye-fill";
   }
 }
 
+
+/* =========================================
+   DATETIME
+========================================= */
 function updateDateTime() {
+
   const now = new Date();
 
-  const dateOptions = {
-    weekday: 'long',
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
-  };
+  const currentDate =
+    now.toLocaleDateString("id-ID", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric"
+    });
 
-  const currentDate = now.toLocaleDateString('id-ID', dateOptions);
+  const currentTime =
+    now.toLocaleTimeString("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
 
-  const currentTime = now.toLocaleTimeString('id-ID', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
-  });
+  const dateEl =
+    document.getElementById("currentDate");
 
-  document.getElementById('currentDate').innerText = currentDate;
-  document.getElementById('liveClock').innerText = currentTime;
+  const clockEl =
+    document.getElementById("liveClock");
+
+  if (dateEl) dateEl.innerText = currentDate;
+  if (clockEl) clockEl.innerText = currentTime;
 }
 
 updateDateTime();
 setInterval(updateDateTime, 1000);
 
-function removeTask(button) {
-  const totalTask = document.querySelectorAll('.task-row').length;
 
-  // Minimal 1 field tersisa
-  if (totalTask <= 1) {
-    Swal.fire(
-      'Oops!',
-      'Minimal harus ada 1 task.',
-      'warning'
-    );
-    return;
-  }
+/* =========================================
+   TIMEPICKER
+========================================= */
+function initTimePicker() {
 
-  button.closest('.task-row').remove();
+  document.querySelectorAll(".timepicker")
+    .forEach((el) => {
+
+      if (el._flatpickr) return;
+
+      flatpickr(el, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: "H:i",
+        time_24hr: true,
+        minuteIncrement: 5,
+        disableMobile: true
+      });
+    });
 }
 
-  function nav(id) {
-  document.querySelectorAll('.page').forEach(p => {
-    p.classList.remove('active');
-    p.style.display = "none";
-  });
 
-  const active = document.getElementById(id);
-  active.classList.add('active');
-  active.style.display = "flex";
-}
-
+/* =========================================
+   EXIT APP
+========================================= */
 function confirmExit() {
+
   Swal.fire({
-    title: 'Keluar dari aplikasi?',
+    title: "Keluar dari aplikasi?",
     text: "Kamu harus login kembali nanti.",
-    icon: 'warning',
+    icon: "warning",
     showCancelButton: true,
-    confirmButtonColor: '#f5c451',
-    confirmButtonText: 'Ya, keluar',
-    cancelButtonText: 'Batal'
+    confirmButtonColor: "#f5c451",
+    confirmButtonText: "Ya, keluar",
+    cancelButtonText: "Batal"
   }).then((result) => {
+
     if (result.isConfirmed) {
-      // HAPUS DATA DARI STORAGE
-      localStorage.removeItem('jef_user_logged');
-      localStorage.removeItem('jef_user_name');
-      location.reload(); // Refresh akan mengembalikan ke halaman login
+
+      localStorage.removeItem("jef_user_logged");
+      localStorage.removeItem("jef_user_name");
+
+      location.reload();
     }
   });
 }
 
 
-  function initTimePicker() {
-  document.querySelectorAll(".timepicker").forEach(el => {
-    if (el._flatpickr) return;
+/* =========================================
+   AUTO LOGIN
+========================================= */
+window.onload = function () {
 
-    flatpickr(el, {
-      enableTime: true,
-      noCalendar: true,
-      dateFormat: "H:i",
-      time_24hr: true,
-      minuteIncrement: 5,
-      disableMobile: true
-    });
-  });
-}
+  const savedUser =
+    localStorage.getItem("jef_user_logged");
 
-// Cek status login saat halaman dimuat
-window.onload = function() {
-  const savedUser = localStorage.getItem('jef_user_logged');
-  const savedName = localStorage.getItem('jef_user_name');
+  const savedName =
+    localStorage.getItem("jef_user_name");
 
   if (savedUser && savedName) {
+
     user = savedUser;
-    document.getElementById('userLabel').innerText = savedName;
-    nav('pageMenu');
-    // Menghilangkan loading screen jika ada
+
+    document.getElementById("userLabel").innerText =
+      savedName;
+
+    nav("pageMenu");
+
     Swal.close();
   }
 };
 
-  // Register Service Worker
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(reg => {
-      console.log('SW Registered!', reg);
-    }).catch(err => {
-      console.log('SW Registration failed:', err);
-    });
+
+/* =========================================
+   SERVICE WORKER
+========================================= */
+if ("serviceWorker" in navigator) {
+
+  window.addEventListener("load", () => {
+
+    navigator.serviceWorker
+      .register("/sw.js")
+
+      .then((reg) => {
+        console.log("SW Registered!", reg);
+      })
+
+      .catch((err) => {
+        console.log("SW Registration failed:", err);
+      });
   });
 }
 
-// Logic untuk tombol Install PWA (Opsional: Munculkan banner jika belum install)
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  // Di sini Anda bisa memunculkan tombol "Install App" jika diinginkan
-});
 
-  window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const installBtn = document.getElementById('installBtn');
-  if(installBtn) installBtn.style.display = 'block';
-});
+/* =========================================
+   PWA INSTALL
+========================================= */
+window.addEventListener(
+  "beforeinstallprompt",
+  (e) => {
+
+    e.preventDefault();
+
+    deferredPrompt = e;
+
+    const installBtn =
+      document.getElementById("installBtn");
+
+    if (installBtn) {
+      installBtn.style.display = "block";
+    }
+
+    if (localStorage.getItem("jef_user_logged")) {
+
+      setTimeout(() => {
+
+        const modal =
+          document.getElementById("pwaInstallModal");
+
+        if (modal) {
+          modal.style.display = "flex";
+        }
+
+      }, 3000);
+    }
+  }
+);
+
 
 async function triggerInstall() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      document.getElementById('installBtn').style.display = 'none';
-    }
-    deferredPrompt = null;
-  }
-}
 
- let deferredPrompt; // Variabel untuk menyimpan event instalasi
-
-// 1. Tangkap event instalasi dari browser
-window.addEventListener('beforeinstallprompt', (e) => {
-  // Mencegah Chrome memunculkan banner default yang membosankan
-  e.preventDefault();
-  // Simpan event agar bisa dipicu nanti
-  deferredPrompt = e;
-  
-  // Munculkan modal custom kita setelah user login atau 3 detik setelah load
-  if (localStorage.getItem('jef_user_logged')) {
-    setTimeout(() => {
-      document.getElementById('pwaInstallModal').style.display = 'flex';
-    }, 3000);
-  }
-});
-
-// 2. Fungsi saat tombol "Install Sekarang" diklik
-async function executePwaInstall() {
   if (!deferredPrompt) return;
-  
-  // Sembunyikan modal kita
-  closePwaModal();
-  
-  // Jalankan prompt asli browser
+
   deferredPrompt.prompt();
-  
-  // Tunggu respon user
-  const { outcome } = await deferredPrompt.userChoice;
-  console.log(`User response to install: ${outcome}`);
-  
-  // Reset deferredPrompt karena hanya bisa dipakai sekali
+
+  const { outcome } =
+    await deferredPrompt.userChoice;
+
+  if (outcome === "accepted") {
+
+    document.getElementById("installBtn")
+      .style.display = "none";
+  }
+
   deferredPrompt = null;
 }
 
-function closePwaModal() {
-  document.getElementById('pwaInstallModal').style.display = 'none';
+
+async function executePwaInstall() {
+
+  if (!deferredPrompt) return;
+
+  closePwaModal();
+
+  deferredPrompt.prompt();
+
+  const { outcome } =
+    await deferredPrompt.userChoice;
+
+  console.log("Install result:", outcome);
+
+  deferredPrompt = null;
 }
 
-// Tambahan: Sembunyikan modal jika aplikasi sudah terinstall
-window.addEventListener('appinstalled', (evt) => {
-  console.log('JEF App telah terinstall!');
+
+function closePwaModal() {
+
+  const modal =
+    document.getElementById("pwaInstallModal");
+
+  if (modal) {
+    modal.style.display = "none";
+  }
+}
+
+
+window.addEventListener("appinstalled", () => {
+
+  console.log("PWA Installed");
+
   closePwaModal();
 });
-  
 </script>
 
   <!-- Custom Modal PWA Install -->
