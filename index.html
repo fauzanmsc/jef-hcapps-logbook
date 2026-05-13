@@ -946,20 +946,7 @@ select:-webkit-autofill {
     </div>
   </div>
 
-  <!-- Modal Notification Permission -->
-<div id="notifModal" class="page" style="position: fixed; top: 0; left: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; justify-content: center; align-items: center;">
-  <div class="bento-card text-center shadow-lg animate__animated animate__zoomIn" style="max-width: 340px;">
-    <div class="mb-3">
-      <i class="bi bi-bell-fill text-warning" style="font-size: 3rem; filter: drop-shadow(0 0 10px rgba(245,196,81,0.5));"></i>
-    </div>
-    <h4 class="fw-bold">Aktifkan Notifikasi?</h4>
-    <p class="text-muted small">Dapatkan pengingat untuk mengisi logbook harian agar aktivitasmu selalu tercatat.</p>
-    <div class="d-grid gap-2 mt-4">
-      <button class="btn btn-jef" onclick="requestNotification()">Izinkan Sekarang</button>
-      <button class="btn btn-link text-muted btn-sm" onclick="closeNotifModal()">Nanti Saja</button>
-    </div>
-  </div>
-</div>
+
   
 </div> 
 
@@ -1015,8 +1002,7 @@ select:-webkit-autofill {
     user = res.username;
     document.getElementById('userLabel').innerText = res.name;
     nav('pageMenu'); 
-    // Tawarkan notifikasi setelah sukses masuk
-    setTimeout(showNotifModal, 2000);
+
   } else { 
     Swal.fire('Login Gagal', 'Username atau password salah.', 'error');
   }
@@ -1408,59 +1394,73 @@ async function triggerInstall() {
   }
 }
 
-  // Fungsi untuk memunculkan modal notifikasi
-function showNotifModal() {
-  // Cek jika browser mendukung notifikasi dan belum pernah diizinkan/ditolak
-  if ("Notification" in window) {
-    if (Notification.permission === "default") {
-      document.getElementById('notifModal').style.display = 'flex';
-    }
-  }
-}
+ let deferredPrompt; // Variabel untuk menyimpan event instalasi
 
-function closeNotifModal() {
-  document.getElementById('notifModal').style.display = 'none';
-}
-
-// Fungsi inti meminta izin browser
-async function requestNotification() {
-  const permission = await Notification.requestPermission();
-  closeNotifModal();
+// 1. Tangkap event instalasi dari browser
+window.addEventListener('beforeinstallprompt', (e) => {
+  // Mencegah Chrome memunculkan banner default yang membosankan
+  e.preventDefault();
+  // Simpan event agar bisa dipicu nanti
+  deferredPrompt = e;
   
-  if (permission === "granted") {
-    Swal.fire({
-      title: 'Notifikasi Aktif!',
-      text: 'Kami akan mengirimkan pengingat logbook.',
-      icon: 'success',
-      confirmButtonColor: '#f5c451'
-    });
-    
-    // Contoh testing notifikasi (muncul setelah 2 detik)
-    setTimeout(() => {
-      new Notification("JEF Daily Log Book", {
-        body: "Terima kasih sudah mengaktifkan notifikasi!",
-        icon: "/jef-icons.png"
-      });
-    }, 2000);
-    
-  } else {
-    console.log("Izin notifikasi ditolak oleh user.");
-  }
-}
-
-// UPDATE: Panggil showNotifModal di dalam window.onload atau setelah doLogin
-const originalOnload = window.onload || function() {};
-window.onload = function() {
-  originalOnload(); // Menjalankan auto-login yang sudah kita buat sebelumnya
-  
-  // Jika user sudah login, tawarkan notifikasi setelah 3 detik
+  // Munculkan modal custom kita setelah user login atau 3 detik setelah load
   if (localStorage.getItem('jef_user_logged')) {
-    setTimeout(showNotifModal, 3000);
+    setTimeout(() => {
+      document.getElementById('pwaInstallModal').style.display = 'flex';
+    }, 3000);
   }
-};
+});
+
+// 2. Fungsi saat tombol "Install Sekarang" diklik
+async function executePwaInstall() {
+  if (!deferredPrompt) return;
+  
+  // Sembunyikan modal kita
+  closePwaModal();
+  
+  // Jalankan prompt asli browser
+  deferredPrompt.prompt();
+  
+  // Tunggu respon user
+  const { outcome } = await deferredPrompt.userChoice;
+  console.log(`User response to install: ${outcome}`);
+  
+  // Reset deferredPrompt karena hanya bisa dipakai sekali
+  deferredPrompt = null;
+}
+
+function closePwaModal() {
+  document.getElementById('pwaInstallModal').style.display = 'none';
+}
+
+// Tambahan: Sembunyikan modal jika aplikasi sudah terinstall
+window.addEventListener('appinstalled', (evt) => {
+  console.log('JEF App telah terinstall!');
+  closePwaModal();
+});
   
 </script>
 
+  <!-- Custom Modal PWA Install -->
+<div id="pwaInstallModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; backdrop-filter: blur(8px); justify-content: center; align-items: center; padding: 20px;">
+  <div class="bento-card text-center animate__animated animate__zoomIn" style="max-width: 380px; border: 2px solid var(--gold);">
+    <div class="mb-3">
+      <div class="p-3 d-inline-block rounded-4" style="background: rgba(245,196,81,0.1);">
+        <img src="/jef-icons.png" alt="Icon" style="width: 70px; height: 70px; border-radius: 15px; box-shadow: 0 0 20px rgba(245,196,81,0.4);">
+      </div>
+    </div>
+    <h4 class="fw-bold mb-2">Pasang Aplikasi JEF</h4>
+    <p class="text-muted small px-2">Akses Daily Log Book lebih cepat dan mudah langsung dari layar utama HP Anda tanpa melalui browser.</p>
+    
+    <div class="d-grid gap-2 mt-4">
+      <button class="btn btn-jef py-3" onclick="executePwaInstall()">
+        <i class="bi bi-download me-2"></i> Install Sekarang
+      </button>
+      <button class="btn btn-link text-muted btn-sm" onclick="closePwaModal()">Mungkin Nanti</button>
+    </div>
+  </div>
+</div>
+  
   
 </body>
 </html>
