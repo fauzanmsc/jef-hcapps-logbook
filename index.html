@@ -6,6 +6,12 @@
 
   <!-- Primary Meta Tags -->
   <title>JEF WEB APPS - Daily Log Book</title>
+  <!-- PWA Meta Tags -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="JEF LOGBOOK">
+  
   <meta name="title" content="JEF WEB APPS - Daily Log Book">
   <meta name="description" content="Aplikasi Daily Log Book Internal JEF untuk pencatatan aktivitas, task management, dan reporting harian karyawan.">
 
@@ -810,6 +816,10 @@ select:-webkit-autofill {
   <i class="bi bi-box-arrow-right"></i>
   Keluar Aplikasi
 </button>
+
+      <button id="installBtn" class="btn btn-jef mt-3" style="display:none;" onclick="triggerInstall()">
+  <i class="bi bi-download"></i> Install Aplikasi
+</button>
       
     </div>
   </div>
@@ -1343,6 +1353,43 @@ window.onload = function() {
     Swal.close();
   }
 };
+
+  // Register Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('SW Registered!', reg);
+    }).catch(err => {
+      console.log('SW Registration failed:', err);
+    });
+  });
+}
+
+// Logic untuk tombol Install PWA (Opsional: Munculkan banner jika belum install)
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Di sini Anda bisa memunculkan tombol "Install App" jika diinginkan
+});
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById('installBtn');
+  if(installBtn) installBtn.style.display = 'block';
+});
+
+async function triggerInstall() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      document.getElementById('installBtn').style.display = 'none';
+    }
+    deferredPrompt = null;
+  }
+}
   
 </script>
 
