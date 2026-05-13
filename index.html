@@ -946,7 +946,22 @@ select:-webkit-autofill {
     </div>
   </div>
 
+  <!-- Modal Notification Permission -->
+<div id="notifModal" class="page" style="position: fixed; top: 0; left: 0; background: rgba(0,0,0,0.8); z-index: 9999; display: none; justify-content: center; align-items: center;">
+  <div class="bento-card text-center shadow-lg animate__animated animate__zoomIn" style="max-width: 340px;">
+    <div class="mb-3">
+      <i class="bi bi-bell-fill text-warning" style="font-size: 3rem; filter: drop-shadow(0 0 10px rgba(245,196,81,0.5));"></i>
+    </div>
+    <h4 class="fw-bold">Aktifkan Notifikasi?</h4>
+    <p class="text-muted small">Dapatkan pengingat untuk mengisi logbook harian agar aktivitasmu selalu tercatat.</p>
+    <div class="d-grid gap-2 mt-4">
+      <button class="btn btn-jef" onclick="requestNotification()">Izinkan Sekarang</button>
+      <button class="btn btn-link text-muted btn-sm" onclick="closeNotifModal()">Nanti Saja</button>
+    </div>
+  </div>
 </div>
+  
+</div> 
 
 <footer class="app-footer">
   <small>
@@ -1000,6 +1015,8 @@ select:-webkit-autofill {
     user = res.username;
     document.getElementById('userLabel').innerText = res.name;
     nav('pageMenu'); 
+    // Tawarkan notifikasi setelah sukses masuk
+    setTimeout(showNotifModal, 2000);
   } else { 
     Swal.fire('Login Gagal', 'Username atau password salah.', 'error');
   }
@@ -1390,6 +1407,57 @@ async function triggerInstall() {
     deferredPrompt = null;
   }
 }
+
+  // Fungsi untuk memunculkan modal notifikasi
+function showNotifModal() {
+  // Cek jika browser mendukung notifikasi dan belum pernah diizinkan/ditolak
+  if ("Notification" in window) {
+    if (Notification.permission === "default") {
+      document.getElementById('notifModal').style.display = 'flex';
+    }
+  }
+}
+
+function closeNotifModal() {
+  document.getElementById('notifModal').style.display = 'none';
+}
+
+// Fungsi inti meminta izin browser
+async function requestNotification() {
+  const permission = await Notification.requestPermission();
+  closeNotifModal();
+  
+  if (permission === "granted") {
+    Swal.fire({
+      title: 'Notifikasi Aktif!',
+      text: 'Kami akan mengirimkan pengingat logbook.',
+      icon: 'success',
+      confirmButtonColor: '#f5c451'
+    });
+    
+    // Contoh testing notifikasi (muncul setelah 2 detik)
+    setTimeout(() => {
+      new Notification("JEF Daily Log Book", {
+        body: "Terima kasih sudah mengaktifkan notifikasi!",
+        icon: "/jef-icons.png"
+      });
+    }, 2000);
+    
+  } else {
+    console.log("Izin notifikasi ditolak oleh user.");
+  }
+}
+
+// UPDATE: Panggil showNotifModal di dalam window.onload atau setelah doLogin
+const originalOnload = window.onload || function() {};
+window.onload = function() {
+  originalOnload(); // Menjalankan auto-login yang sudah kita buat sebelumnya
+  
+  // Jika user sudah login, tawarkan notifikasi setelah 3 detik
+  if (localStorage.getItem('jef_user_logged')) {
+    setTimeout(showNotifModal, 3000);
+  }
+};
   
 </script>
 
