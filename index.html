@@ -967,7 +967,7 @@ select:-webkit-autofill {
    CONFIG
 ========================================= */
 const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbwf3AXspSo3tyqi_6N7O1b_bhv2Y_NjqV1bewbFM2erxz26YHZO5Vt6ReEwdiErze-u1w/exec"; ////UBAH URL
+  "https://script.google.com/macros/s/AKfycbwRo08310LtSzGEL2tD1YRSL5maqDgJeV03cpvEOgvTfy0ix0Bo8tcjNBz2MU4zHm-cfQ/exec"; ////UBAH URL
 
 let user = "";
 let deferredPrompt = null;
@@ -976,13 +976,18 @@ let deferredPrompt = null;
 /* =========================================
    HELPER API
 ========================================= */
-const response = await fetch(WEB_APP_URL, {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify(payload)
-});
+/* =========================================
+   HELPER API
+========================================= */
+async function callAPI(payload) {
+
+  const response = await fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  });
 
   return await response.json();
 }
@@ -1022,10 +1027,12 @@ function loader(text = "Loading...") {
    LOGIN
 ========================================= */
 async function doLogin() {
+
   const u = document.getElementById("u").value.trim();
   const p = document.getElementById("p").value.trim();
 
   if (!u || !p) {
+
     return Swal.fire(
       "Oops!",
       "Lengkapi kredensial login terlebih dahulu.",
@@ -1034,6 +1041,7 @@ async function doLogin() {
   }
 
   try {
+
     loader("Proses Autentifikasi...");
 
     const res = await callAPI({
@@ -1046,24 +1054,49 @@ async function doLogin() {
 
     if (res.success) {
 
-  Swal.fire(
-    "Success",
-    res.message,
-    "success"
-  );
+      // Simpan session user
+      user = res.username;
 
-} else {
+      // Simpan local storage
+      localStorage.setItem(
+        "jef_user_logged",
+        res.username
+      );
 
-  Swal.fire(
-    "Error",
-    res.error || "Gagal menyimpan data",
-    "error"
-  );
+      localStorage.setItem(
+        "jef_user_name",
+        res.name
+      );
 
-  return;
-}
+      // Update nama user di dashboard
+      document.getElementById("userLabel")
+        .innerText = res.name;
+
+      // Alert sukses
+      Swal.fire({
+        title: "Login Berhasil",
+        text: "Selamat datang, " + res.name,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false
+      });
+
+      // Pindah halaman
+      nav("pageMenu");
+
+    } else {
+
+      Swal.fire(
+        "Login Gagal",
+        "Username atau Password salah.",
+        "error"
+      );
+
+      return;
+    }
 
   } catch (err) {
+
     Swal.close();
 
     console.error(err);
@@ -1284,6 +1317,8 @@ async function showReport() {
 
     tasks.forEach((t, i) => {
 
+      if (!t.row) return;
+      
       h += `
       <div class="bento-card mb-3 bg-light report-item"
            data-row="${t.row}"
