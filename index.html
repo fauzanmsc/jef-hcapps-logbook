@@ -832,10 +832,6 @@ select:-webkit-autofill {
   <div id="reportContainer"></div>
 
 
-<div class="col-12 mt-3">
-  <label class="small fw-semibold mb-2">Catatan Tambahan (Opsional)</label>
-  <textarea id="genNote" class="form-control" placeholder="Tulis catatan umum untuk hari ini..." rows="2"></textarea>
-</div>
         
 </div>
       <div class="p-4 border-top bg-light">
@@ -1080,14 +1076,17 @@ async function finalReport() {
   
   const reportItems = document.querySelectorAll('.report-item');
   
+  if (reportItems.length === 0) return;
+
   reportItems.forEach(div => {
     const startTime = div.querySelector('.r-start').value;
     const endTime = div.querySelector('.r-end').value;
     const output = div.querySelector('.r-out').value;
-    const issue = div.querySelector('.r-iss').value; // Ini opsional
+    const issue = div.querySelector('.r-iss').value;
     const completed = div.querySelector('.r-c').checked;
 
-    // VALIDASI: Hanya startTime, endTime, dan output yang benar-benar wajib
+    // Validasi: Jam Mulai, Jam Selesai, Output, dan Checkbox Selesai WAJIB diisi
+    // Issue/Kendala tetap dibiarkan Opsional
     if (!startTime || !endTime || !output || !completed) {
       isAllValid = false;
       div.style.border = "2px solid #ff4d4d"; 
@@ -1101,7 +1100,7 @@ async function finalReport() {
       startTime,
       endTime,
       output,
-      issue: issue || "-", // Beri strip jika kosong
+      issue: issue || "-", 
       completed
     });
   });
@@ -1110,24 +1109,28 @@ async function finalReport() {
     return Swal.fire('Oops!', 'Mohon lengkapi Jam, Output, dan centang "Ya, Selesai" di setiap tugas.', 'warning');
   }
 
-  // Ambil nilai genNote, jika elemen tidak ada beri string kosong agar tidak error
-  const noteElement = document.getElementById('genNote');
-  const noteValue = noteElement ? noteElement.value : "";
-
   loader('Mengirim Report...');
+
   try {
     const res = await callAPI({ 
       action: 'submitReport', 
       data: { 
         reports: JSON.stringify(reports), 
-        note: noteValue
+        note: "" // PERUBAHAN DI SINI: Kita kirim string kosong secara manual
       } 
     });
     
-    Swal.fire('Berhasil', res.message, 'success'); 
+    Swal.fire({
+      title: 'Berhasil',
+      text: res.message,
+      icon: 'success',
+      confirmButtonColor: '#f5c451'
+    }); 
     nav('pageMenu');
   } catch (err) {
-    Swal.fire('Gagal', 'Terjadi kesalahan saat mengirim data.', 'error');
+    Swal.close();
+    Swal.fire('Error', 'Gagal mengirim laporan ke server.', 'error');
+    console.error(err);
   }
 }
 ////////
