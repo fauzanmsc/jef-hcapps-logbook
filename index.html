@@ -971,24 +971,30 @@ select:-webkit-autofill {
     Swal.fire({ title: text, allowOutsideClick: false, didOpen: () => Swal.showLoading() });
   }
 
+  ////// DoLOGIN
   
   async function doLogin() {
-    const u = document.getElementById('u').value;
-    const p = document.getElementById('p').value;
-    if(!u || !p) return Swal.fire('Oops!', 'Lengkapi kredensial login terlebih dahulu.', 'warning');
-    
-    loader('Proses Autentifikasi...');
-    const res = await callAPI({ action: 'checkLogin', u, p });
-    Swal.close();
-    if(res.success) { 
-      user = res.username;
-document.getElementById('userLabel').innerText = res.name;
-      nav('pageMenu'); 
-    } else { 
-      Swal.fire('Login Gagal', 'Username atau password yang dimasukkan salah.', 'error');
-    }
-  }
+  const u = document.getElementById('u').value;
+  const p = document.getElementById('p').value;
+  if(!u || !p) return Swal.fire('Oops!', 'Lengkapi kredensial login terlebih dahulu.', 'warning');
+  
+  loader('Proses Autentifikasi...');
+  const res = await callAPI({ action: 'checkLogin', u, p });
+  Swal.close();
 
+  if(res.success) { 
+    // SIMPAN KE STORAGE
+    localStorage.setItem('jef_user_logged', res.username);
+    localStorage.setItem('jef_user_name', res.name);
+    
+    user = res.username;
+    document.getElementById('userLabel').innerText = res.name;
+    nav('pageMenu'); 
+  } else { 
+    Swal.fire('Login Gagal', 'Username atau password salah.', 'error');
+  }
+}
+/////////
   async function showPlan() {
   loader('Memuat logbook...');
   const p = await callAPI({ action: 'getUserProfile', username: user });
@@ -1292,14 +1298,18 @@ function removeTask(button) {
 function confirmExit() {
   Swal.fire({
     title: 'Keluar dari aplikasi?',
-    text: "Anda akan kembali ke halaman awal.",
+    text: "Anda harus login kembali nanti.",
     icon: 'warning',
     showCancelButton: true,
+    confirmButtonColor: '#f5c451',
     confirmButtonText: 'Ya, keluar',
     cancelButtonText: 'Batal'
   }).then((result) => {
     if (result.isConfirmed) {
-      location.reload();
+      // HAPUS DATA DARI STORAGE
+      localStorage.removeItem('jef_user_logged');
+      localStorage.removeItem('jef_user_name');
+      location.reload(); // Refresh akan mengembalikan ke halaman login
     }
   });
 }
@@ -1320,7 +1330,19 @@ function confirmExit() {
   });
 }
 
+// Cek status login saat halaman dimuat
+window.onload = function() {
+  const savedUser = localStorage.getItem('jef_user_logged');
+  const savedName = localStorage.getItem('jef_user_name');
 
+  if (savedUser && savedName) {
+    user = savedUser;
+    document.getElementById('userLabel').innerText = savedName;
+    nav('pageMenu');
+    // Menghilangkan loading screen jika ada
+    Swal.close();
+  }
+};
   
 </script>
 
