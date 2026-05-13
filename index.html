@@ -830,7 +830,13 @@ select:-webkit-autofill {
       </div>
       <div class="p-4 report-scroll">
   <div id="reportContainer"></div>
-  
+
+
+<div class="col-12 mt-3">
+  <label class="small fw-semibold mb-2">Catatan Tambahan (Opsional)</label>
+  <textarea id="genNote" class="form-control" placeholder="Tulis catatan umum untuk hari ini..." rows="2"></textarea>
+</div>
+        
 </div>
       <div class="p-4 border-top bg-light">
         <button class="btn btn-jef w-100 fw-bold p-3 rounded-4 mb-3 d-flex align-items-center justify-content-center gap-2"
@@ -1067,9 +1073,7 @@ async function showReport() {
   }
 }
 
-
-  
-
+////FINAL REPORT
 async function finalReport() {
   let reports = [];
   let isAllValid = true;
@@ -1080,13 +1084,13 @@ async function finalReport() {
     const startTime = div.querySelector('.r-start').value;
     const endTime = div.querySelector('.r-end').value;
     const output = div.querySelector('.r-out').value;
-    const issue = div.querySelector('.r-iss').value;
+    const issue = div.querySelector('.r-iss').value; // Ini opsional
     const completed = div.querySelector('.r-c').checked;
 
-    // VALIDASI FIELD WAJIB
-    if (!startTime || !endTime || !output || !issue || !completed) {
+    // VALIDASI: Hanya startTime, endTime, dan output yang benar-benar wajib
+    if (!startTime || !endTime || !output || !completed) {
       isAllValid = false;
-      div.style.border = "1px solid #ff4d4d"; // Tandai box merah jika salah
+      div.style.border = "2px solid #ff4d4d"; 
     } else {
       div.style.border = "none";
       div.style.borderLeft = "5px solid #f5c451";
@@ -1097,28 +1101,36 @@ async function finalReport() {
       startTime,
       endTime,
       output,
-      issue,
+      issue: issue || "-", // Beri strip jika kosong
       completed
     });
   });
 
   if (!isAllValid) {
-    return Swal.fire('Oops!', 'Mohon lengkapi Jam, Output, Kendala, dan Centang Selesai di setiap tugas.', 'warning');
+    return Swal.fire('Oops!', 'Mohon lengkapi Jam, Output, dan centang "Ya, Selesai" di setiap tugas.', 'warning');
   }
 
+  // Ambil nilai genNote, jika elemen tidak ada beri string kosong agar tidak error
+  const noteElement = document.getElementById('genNote');
+  const noteValue = noteElement ? noteElement.value : "";
+
   loader('Mengirim Report...');
-  const res = await callAPI({ 
-    action: 'submitReport', 
-    data: { 
-      reports: JSON.stringify(reports), 
-      note: document.getElementById('genNote').value 
-    } 
-  });
-  
-  Swal.fire('Berhasil', res.message, 'success'); 
-  nav('pageMenu');
+  try {
+    const res = await callAPI({ 
+      action: 'submitReport', 
+      data: { 
+        reports: JSON.stringify(reports), 
+        note: noteValue
+      } 
+    });
+    
+    Swal.fire('Berhasil', res.message, 'success'); 
+    nav('pageMenu');
+  } catch (err) {
+    Swal.fire('Gagal', 'Terjadi kesalahan saat mengirim data.', 'error');
+  }
 }
-  ///
+////////
 
 
   
