@@ -167,6 +167,35 @@ body {
   flex-direction: column;
 }
 
+    /* Animasi Logo JEF */
+.logo-anim {
+  animation: float 4s ease-in-out infinite;
+  filter: drop-shadow(0 5px 15px rgba(245, 196, 81, 0.4));
+  transition: transform 0.3s ease;
+}
+
+/* Efek saat logo disentuh (Hover) */
+.logo-anim:hover {
+  transform: scale(1.1) rotate(5deg);
+  filter: drop-shadow(0 0 25px rgba(245, 196, 81, 0.7));
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 5px 15px rgba(245, 196, 81, 0.4));
+  }
+  50% {
+    transform: translateY(-12px);
+    /* Bayangan melebar saat logo naik */
+    filter: drop-shadow(0 20px 25px rgba(245, 196, 81, 0.2));
+  }
+  100% {
+    transform: translateY(0px);
+    filter: drop-shadow(0 5px 15px rgba(245, 196, 81, 0.4));
+  }
+}
+
     #pageReport .border-top {
   position: sticky;
   bottom: 0;
@@ -643,16 +672,15 @@ select:-webkit-autofill {
   
   <div id="pageLogin" class="page active">
     <div class="bento-header shadow-lg text-center">
-  <img 
-    src="/jef-logomark.png" 
-    alt="JEF Logo"
-    class="mb-2"
-    style="max-width: 80px; height: auto;"
-  >
-
-  <h3 class="fw-bold mb-0">JEF WEB APPS</h3>
-  <small class="opacity-50">Daily Log Book v1.0</small>
-</div>
+      <img 
+        src="/jef-logomark.png" 
+        alt="JEF Logo"
+        class="mb-2 logo-anim" 
+        style="max-width: 80px; height: auto;"
+      >
+      <h3 class="fw-bold mb-0">JEF WEB APPS</h3>
+      <small class="opacity-50">Daily Log Book v1.0</small>
+    </div>
     <div class="bento-card">
       <div class="mb-3">
         <label class="small fw-bold text-muted mb-2 d-block">Masukkan Username</label>
