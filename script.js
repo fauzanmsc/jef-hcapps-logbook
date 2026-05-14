@@ -1,7 +1,7 @@
 /* =========================================
    CONFIG & GLOBAL VARIABLES
 ========================================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxDv3hzc5yiezxNOg9v2ilvHpvL-z4xZyclvX4zXAP_F0ynmEmTqAKIa8h4bUBwwqvD/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby8gdFUTmrgBnmgUqFimuMFs_ZaJw_AWkyRVfBco0VmQrb4bZC6zLvKLT-c7aGV0EvOhw/exec";
 
 let user = localStorage.getItem("jef_user_logged") || "";
 let deferredPrompt = null;
@@ -386,6 +386,7 @@ async function deleteTask(row) {
                 action: "deleteTask", 
                 row: row 
             });
+           
 
             if (res && res.success) {
                 Swal.fire({
