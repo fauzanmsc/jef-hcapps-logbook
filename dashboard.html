@@ -199,7 +199,7 @@ date:t3.value
 if(!form)return;
 
 await callAPI({
-action:'addDashboardTask',
+action:'addTaskDashboard',
 data:{
 username:user,
 position:'-',
@@ -232,7 +232,7 @@ date:t3.value
 if(!form)return;
 
 await callAPI({
-action:'updateDashboardTask',
+action:'updateTask',
 data:{
 id:id,
 task:form.task,
@@ -254,7 +254,7 @@ showCancelButton:true
 if(!x.isConfirmed)return;
 
 await callAPI({
-action:'deleteDashboardTask',id:id});
+action:'deleteTask',id:id});
 loadTasks();
 }
 
@@ -268,4 +268,3 @@ loadTasks();
 
 </body>
 </html>
-
