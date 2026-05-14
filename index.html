@@ -8,7 +8,6 @@
   <title>JEF WEB APPS - Daily Log Book</title>
   <!-- PWA Meta Tags -->
   <link rel="manifest" href="manifest.json">
-  <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="JEF LOGBOOK">
@@ -967,7 +966,7 @@ select:-webkit-autofill {
    CONFIG
 ========================================= */
 const WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbwdRg9VXqusLRniYIRVFFyHMQHJqnef3klnsMbEyxn6xYrGUnXhUmvmUsn_QA9vMYZVxQ/exec"; ////UBAH URL
+  "https://script.google.com/macros/s/AKfycbwaRUqogAvfAWyO5RCUMfqWYtlBN6niKLOuU6hRXPiSNAmafD78dAiW4j0h1S4o-OEUJA/exec"; ////UBAH URL
 
 let user = "";
 let deferredPrompt = null;
@@ -979,15 +978,22 @@ let deferredPrompt = null;
 /* =========================================
    HELPER API
 ========================================= */
-async function callAPI(payload) {
+async function callAPI(payload){
 
-  const response = await fetch(WEB_APP_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  });
+  const formData = new URLSearchParams();
+
+  formData.append(
+    "data",
+    JSON.stringify(payload)
+  );
+
+  const response = await fetch(
+    WEB_APP_URL,
+    {
+      method:"POST",
+      body:formData
+    }
+  );
 
   return await response.json();
 }
