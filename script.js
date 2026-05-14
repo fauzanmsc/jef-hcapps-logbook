@@ -363,11 +363,49 @@ async function editTask(row, task, target) {
     loadDashboardTasks();
 }
 
+/* =========================================
+   DELETE TASK LOGIC (DASHBOARD)
+========================================= */
 async function deleteTask(row) {
-    let x = await Swal.fire({ title: "Hapus?", showCancelButton: true });
-    if (!x.isConfirmed) return;
-    await callAPI({ action: "deleteTask", row });
-    loadDashboardTasks();
+    // Memberikan peringatan sebelum menghapus
+    const confirm = await Swal.fire({
+        title: "Hapus Tugas?",
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Ya, Hapus!",
+        cancelButtonText: "Batal"
+    });
+
+    if (confirm.isConfirmed) {
+        loader("Menghapus data...");
+        try {
+            const res = await callAPI({ 
+                action: "deleteTask", 
+                row: row 
+            });
+
+            if (res && res.success) {
+                Swal.fire({
+                    title: "Terhapus!",
+                    text: "Tugas berhasil dihapus.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+                // Refresh daftar tugas setelah menghapus
+                loadDashboardTasks(); 
+            } else {
+                Swal.fire("Gagal", "Gagal menghapus data dari database.", "error");
+            }
+        } catch (err) {
+            Swal.close();
+            console.error("Delete Error:", err);
+            Swal.fire("Error", "Gagal terhubung ke server.", "error");
+        }
+    }
 }
 
 /* =========================================
