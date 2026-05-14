@@ -1,11 +1,11 @@
 /* =========================================
    CONFIG & GLOBAL VARIABLES
 ========================================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyoJMMrNzST3TKi6_O0TvdE3UTPsfrJeVA4SN-LfqpnZarIbOQ2eO56zEdG49NhHxnxGw/exec";
+const WEB_APP_URL =
+  "https://script.google.com/macros/s/AKfycbyoJMMrNzST3TKi6_O0TvdE3UTPsfrJeVA4SN-LfqpnZarIbOQ2eO56zEdG49NhHxnxGw/exec";
 
 let user = localStorage.getItem("jef_user_logged") || "";
 let deferredPrompt = null;
-
 
 /* =========================================
    DASHBOARD LOCAL STATE
@@ -14,75 +14,79 @@ let deferredPrompt = null;
 let dashboardTasks = [];
 
 let pendingChanges = {
-    create: [],
-    update: [],
-    delete: []
+  create: [],
+  update: [],
+  delete: [],
 };
-
 
 /* =========================================
    HELPER API (SHARED)
 ========================================= */
 async function callAPI(payload) {
-    const response = await fetch(WEB_APP_URL, {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-        },
-        body: "data=" + encodeURIComponent(JSON.stringify(payload)),
-    });
-    return await response.json();
+  const response = await fetch(WEB_APP_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: "data=" + encodeURIComponent(JSON.stringify(payload)),
+  });
+  return await response.json();
 }
 
 function loader(text = "Loading...") {
-    Swal.fire({
-        title: text,
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-    });
+  Swal.fire({
+    title: text,
+    allowOutsideClick: false,
+    didOpen: () => Swal.showLoading(),
+  });
 }
 
 /* =========================================
    NAVIGATION & UI UTILS (INDEX)
 ========================================= */
 function nav(id) {
-    document.querySelectorAll(".page").forEach((p) => {
-        p.classList.remove("active");
-        p.style.display = "none";
-    });
+  document.querySelectorAll(".page").forEach((p) => {
+    p.classList.remove("active");
+    p.style.display = "none";
+  });
 
-    const active = document.getElementById(id);
-    if (active) {
-        active.classList.add("active");
-        active.style.display = "flex";
-    }
+  const active = document.getElementById(id);
+  if (active) {
+    active.classList.add("active");
+    active.style.display = "flex";
+  }
 }
 
 function togglePassword() {
-    const input = document.getElementById("p");
-    const icon = document.querySelector(".toggle-password i");
-    if (input.type === "password") {
-        input.type = "text";
-        icon.className = "bi bi-eye-slash-fill";
-    } else {
-        input.type = "password";
-        icon.className = "bi bi-eye-fill";
-    }
+  const input = document.getElementById("p");
+  const icon = document.querySelector(".toggle-password i");
+  if (input.type === "password") {
+    input.type = "text";
+    icon.className = "bi bi-eye-slash-fill";
+  } else {
+    input.type = "password";
+    icon.className = "bi bi-eye-fill";
+  }
 }
 
 function updateDateTime() {
-    const now = new Date();
-    const currentDate = now.toLocaleDateString("id-ID", {
-        weekday: "long", day: "2-digit", month: "long", year: "numeric",
-    });
-    const currentTime = now.toLocaleTimeString("id-ID", {
-        hour: "2-digit", minute: "2-digit", second: "2-digit",
-    });
+  const now = new Date();
+  const currentDate = now.toLocaleDateString("id-ID", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  const currentTime = now.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 
-    const dateEl = document.getElementById("currentDate");
-    const clockEl = document.getElementById("liveClock");
-    if (dateEl) dateEl.innerText = currentDate;
-    if (clockEl) clockEl.innerText = currentTime;
+  const dateEl = document.getElementById("currentDate");
+  const clockEl = document.getElementById("liveClock");
+  if (dateEl) dateEl.innerText = currentDate;
+  if (clockEl) clockEl.innerText = currentTime;
 }
 
 // function initTimePicker() {
@@ -100,133 +104,136 @@ function updateDateTime() {
 // }
 
 function initTimePicker() {
-
-    document.querySelectorAll(".timepicker").forEach((el)=>{
-
-        if(el.dataset.init) return;
-
-        el.dataset.init = "true";
-
-        mdtimepicker(el,{
-            theme:"blue",
-            format:"hh:mm",   // tampil 01:00
-            hourPadding:true,
-            clearBtn:false,
-            is24hour:true
-        });
-
+  document.querySelectorAll(".timepicker").forEach((el) => {
+    if (el._flatpickr) return;
+    flatpickr(el, {
+      enableTime: true,
+      noCalendar: true,
+      dateFormat: "H:i",
+      time_24hr: true,
+      minuteIncrement: 5,
+      disableMobile: true,
     });
-
+  });
 }
 
 /* =========================================
    LOGIN LOGIC (INDEX)
 ========================================= */
 async function doLogin() {
-    const u = document.getElementById("u").value.trim();
-    const p = document.getElementById("p").value.trim();
+  const u = document.getElementById("u").value.trim();
+  const p = document.getElementById("p").value.trim();
 
-    if (!u || !p) {
-        return Swal.fire("Oops!", "Lengkapi kredensial login terlebih dahulu.", "warning");
+  if (!u || !p) {
+    return Swal.fire(
+      "Oops!",
+      "Lengkapi kredensial login terlebih dahulu.",
+      "warning",
+    );
+  }
+
+  try {
+    loader("Proses Autentifikasi...");
+    const res = await callAPI({ action: "checkLogin", u, p });
+    Swal.close();
+
+    if (res.success) {
+      user = res.username;
+      localStorage.setItem("jef_user_logged", res.username);
+      localStorage.setItem("jef_user_name", res.name);
+      document.getElementById("userLabel").innerText = res.name;
+
+      Swal.fire({
+        title: "Login Berhasil",
+        text: "Selamat datang, " + res.name,
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+      nav("pageMenu");
+    } else {
+      Swal.fire("Login Gagal", "Username atau Password salah.", "error");
     }
-
-    try {
-        loader("Proses Autentifikasi...");
-        const res = await callAPI({ action: "checkLogin", u, p });
-        Swal.close();
-
-        if (res.success) {
-            user = res.username;
-            localStorage.setItem("jef_user_logged", res.username);
-            localStorage.setItem("jef_user_name", res.name);
-            document.getElementById("userLabel").innerText = res.name;
-
-            Swal.fire({
-                title: "Login Berhasil",
-                text: "Selamat datang, " + res.name,
-                icon: "success",
-                timer: 1500,
-                showConfirmButton: false,
-            });
-            nav("pageMenu");
-        } else {
-            Swal.fire("Login Gagal", "Username atau Password salah.", "error");
-        }
-    } catch (err) {
-        Swal.close();
-        Swal.fire("System Error", "Gagal terhubung ke server.", "error");
-    }
+  } catch (err) {
+    Swal.close();
+    Swal.fire("System Error", "Gagal terhubung ke server.", "error");
+  }
 }
 
 /* =========================================
    PLAN & REPORT LOGIC (INDEX)
 ========================================= */
 async function showPlan() {
-    try {
-        loader("Memuat logbook...");
-        const p = await callAPI({ action: "getUserProfile", username: user });
-        Swal.close();
+  try {
+    loader("Memuat logbook...");
+    const p = await callAPI({ action: "getUserProfile", username: user });
+    Swal.close();
 
-        document.getElementById("disName").value = user;
-        document.getElementById("disPos").value = p.position || "-";
-        document.getElementById("disDiv").value = p.division || "-";
-        document.getElementById("clockIn").value = new Date().toTimeString().slice(0, 5);
+    document.getElementById("disName").value = user;
+    document.getElementById("disPos").value = p.position || "-";
+    document.getElementById("disDiv").value = p.division || "-";
+    document.getElementById("clockIn").value = new Date()
+      .toTimeString()
+      .slice(0, 5);
 
-        nav("pagePlan");
-        initTimePicker();
-    } catch (err) {
-        Swal.close();
-        Swal.fire("Error", "Gagal memuat data profile.", "error");
-    }
+    nav("pagePlan");
+    initTimePicker();
+  } catch (err) {
+    Swal.close();
+    Swal.fire("Error", "Gagal memuat data profile.", "error");
+  }
 }
 
 function addPlanField() {
-    const html = `
+  const html = `
     <div class="row g-2 mb-2 task-row">
       <div class="col-5"><input type="text" class="form-control tn shadow-sm" placeholder="Isi task / activity"></div>
       <div class="col-5"><input type="text" class="form-control tt shadow-sm" placeholder="Isi target dari task"></div>
       <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100 h-100" onclick="removeTask(this)"><i class="bi bi-trash3-fill"></i></button></div>
     </div>`;
-    document.getElementById("planContainer").insertAdjacentHTML("beforeend", html);
+  document
+    .getElementById("planContainer")
+    .insertAdjacentHTML("beforeend", html);
 }
 
 function removeTask(button) {
-    if (document.querySelectorAll(".task-row").length <= 1) {
-        return Swal.fire("Oops!", "Minimal harus ada 1 task.", "warning");
-    }
-    button.closest(".task-row").remove();
+  if (document.querySelectorAll(".task-row").length <= 1) {
+    return Swal.fire("Oops!", "Minimal harus ada 1 task.", "warning");
+  }
+  button.closest(".task-row").remove();
 }
 
 async function submitPlan() {
-    let tasks = [];
-    document.querySelectorAll(".tn").forEach((el, i) => {
-        if (el.value.trim()) {
-            tasks.push({
-                name: el.value.trim(),
-                target: document.querySelectorAll(".tt")[i].value.trim(),
-            });
-        }
-    });
-
-    if (tasks.length === 0) return Swal.fire("Oops!", "Setidaknya harus ada 1 tugas.", "warning");
-
-    try {
-        loader("Sedang menyimpan task...");
-        const data = {
-            name: user,
-            position: document.getElementById("disPos").value,
-            division: document.getElementById("disDiv").value,
-            clockIn: document.getElementById("clockIn").value,
-            date: new Date().toLocaleDateString("sv-SE"),
-            tasks: JSON.stringify(tasks),
-        };
-        const res = await callAPI({ action: "savePlan", data });
-        Swal.fire("Success", res.message, "success");
-        nav("pageMenu");
-    } catch (err) {
-        Swal.close();
-        Swal.fire("Error", "Gagal menyimpan task.", "error");
+  let tasks = [];
+  document.querySelectorAll(".tn").forEach((el, i) => {
+    if (el.value.trim()) {
+      tasks.push({
+        name: el.value.trim(),
+        target: document.querySelectorAll(".tt")[i].value.trim(),
+      });
     }
+  });
+
+  if (tasks.length === 0)
+    return Swal.fire("Oops!", "Setidaknya harus ada 1 tugas.", "warning");
+
+  try {
+    loader("Sedang menyimpan task...");
+    const data = {
+      name: user,
+      position: document.getElementById("disPos").value,
+      division: document.getElementById("disDiv").value,
+      clockIn: document.getElementById("clockIn").value,
+      date: new Date().toLocaleDateString("sv-SE"),
+      tasks: JSON.stringify(tasks),
+    };
+    const res = await callAPI({ action: "savePlan", data });
+    Swal.fire("Success", res.message, "success");
+    nav("pageMenu");
+  } catch (err) {
+    Swal.close();
+    Swal.fire("Error", "Gagal menyimpan task.", "error");
+  }
 }
 
 // async function showReport() {
@@ -263,30 +270,30 @@ async function submitPlan() {
 // }
 
 async function showReport() {
-    try {
-        loader("Memeriksa tugas aktif...");
-        const tasks = await callAPI({ action: "getActiveTasks", username: user });
-        Swal.close();
+  try {
+    loader("Memeriksa tugas aktif...");
+    const tasks = await callAPI({ action: "getActiveTasks", username: user });
+    Swal.close();
 
-        if (!tasks || tasks.length === 0) {
-            return Swal.fire({ 
-                title: "Tugas Tidak Ditemukan", 
-                text: "Tidak ada tugas aktif saat ini.", 
-                icon: "info",
-                confirmButtonColor: "#3085d6"
-            });
-        }
+    if (!tasks || tasks.length === 0) {
+      return Swal.fire({
+        title: "Tugas Tidak Ditemukan",
+        text: "Tidak ada tugas aktif saat ini.",
+        icon: "info",
+        confirmButtonColor: "#3085d6",
+      });
+    }
 
-        // Header Dashboard Sederhana
-        let h = `
+    // Header Dashboard Sederhana
+    let h = `
             <div class="dashboard-header mb-4 px-2 text-center">
                 <h6 class="text-muted ">Ada <span style="font-weight: bold; color: #f5c451;">${tasks.length} tugas</span> yang perlu dilaporkan.</h6>
             </div>
         `;
 
-        tasks.forEach((t, i) => {
-            if (!t.row) return;
-            h += `
+    tasks.forEach((t, i) => {
+      if (!t.row) return;
+      h += `
             <div class="report-card mb-4 overflow-hidden shadow-sm" data-row="${t.row}" 
                  style="background: #141516;; border-radius: 20px; border: 1px solid #333;">
                 
@@ -312,20 +319,14 @@ async function showReport() {
                             <label class="form-label small text-uppercase fw-bold text-muted">Mulai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-play"></i></span>
-                                <input
-type="text"
-class="form-control bg-dark text-white border-secondary timepicker r-start"
-placeholder="00:00">
+                                <input type="text" class="form-control timepicker r-start" placeholder="00:00">
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label small text-uppercase fw-bold text-muted">Selesai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-stop"></i></span>
-                                <input
-type="text"
-class="form-control bg-dark text-white border-secondary timepicker r-end"
-placeholder="00:00">
+                                <input type="text" class="form-control timepicker r-end" placeholder="00:00">
                             </div>
                         </div>
                         
@@ -351,211 +352,179 @@ placeholder="00:00">
                     </div>
                 </div>
             </div>`;
-        });
+    });
 
-        document.getElementById("reportContainer").innerHTML = h;
-        initTimePicker();
-        nav("pageReport");
-    } catch (err) {
-        Swal.close();
-        Swal.fire("System Error", err.toString(), "error");
-    }
+    document.getElementById("reportContainer").innerHTML = h;
+    initTimePicker();
+    nav("pageReport");
+  } catch (err) {
+    Swal.close();
+    Swal.fire("System Error", err.toString(), "error");
+  }
 }
 
 async function finalReport() {
-    let reports = [];
-    let isAllValid = true;
-    
-    // PERUBAHAN: Selector diganti dari .report-item menjadi .report-card
-    const reportItems = document.querySelectorAll(".report-card"); 
-    
-    if (reportItems.length === 0) return;
+  let reports = [];
+  let isAllValid = true;
 
-    reportItems.forEach((div) => {
-        const startTime = div.querySelector(".r-start").value.trim();
-        const endTime = div.querySelector(".r-end").value.trim();
-        const output = div.querySelector(".r-out").value.trim();
-        const completed = div.querySelector(".r-c").checked;
+  // PERUBAHAN: Selector diganti dari .report-item menjadi .report-card
+  const reportItems = document.querySelectorAll(".report-card");
 
-        // PERUBAHAN: Validasi visual. Issue bersifat opsional, jadi tidak masuk validasi wajib.
-        if (!startTime || !endTime || !output) {
-            isAllValid = false;
-            div.style.border = "2px solid #ff4d4d"; // Border merah jika kosong
-        } else {
-            div.style.border = "1px solid #333"; // Kembalikan ke normal
-        }
+  if (reportItems.length === 0) return;
 
-        reports.push({
-            row: div.dataset.row,
-            startTime, 
-            endTime, 
-            output,
-            issue: div.querySelector(".r-iss").value || "-",
-            completed: completed,
-        });
+  reportItems.forEach((div) => {
+    const startTime = div.querySelector(".r-start").value.trim();
+    const endTime = div.querySelector(".r-end").value.trim();
+    const output = div.querySelector(".r-out").value.trim();
+    const completed = div.querySelector(".r-c").checked;
+
+    // PERUBAHAN: Validasi visual. Issue bersifat opsional, jadi tidak masuk validasi wajib.
+    if (!startTime || !endTime || !output) {
+      isAllValid = false;
+      div.style.border = "2px solid #ff4d4d"; // Border merah jika kosong
+    } else {
+      div.style.border = "1px solid #333"; // Kembalikan ke normal
+    }
+
+    reports.push({
+      row: div.dataset.row,
+      startTime,
+      endTime,
+      output,
+      issue: div.querySelector(".r-iss").value || "-",
+      completed: completed,
+    });
+  });
+
+  // PERUBAHAN: Pesan peringatan lebih jelas
+  if (!isAllValid) {
+    return Swal.fire(
+      "Oops!",
+      "Mohon lengkapi Jam Mulai, Selesai, dan Output Hasil pada setiap tugas.",
+      "warning",
+    );
+  }
+
+  try {
+    loader("Mengirim Report...");
+    // Mengirim data ke action "submitReport"
+    const res = await callAPI({
+      action: "submitReport",
+      data: {
+        reports: JSON.stringify(reports),
+        note: "",
+      },
     });
 
-    // PERUBAHAN: Pesan peringatan lebih jelas
-    if (!isAllValid) {
-        return Swal.fire("Oops!", "Mohon lengkapi Jam Mulai, Selesai, dan Output Hasil pada setiap tugas.", "warning");
+    if (res.success) {
+      Swal.fire("Berhasil", res.message, "success");
+      nav("pageMenu");
+    } else {
+      throw new Error(res.error || "Gagal menyimpan");
     }
-
-    try {
-        loader("Mengirim Report...");
-        // Mengirim data ke action "submitReport"
-        const res = await callAPI({ 
-            action: "submitReport", 
-            data: { 
-                reports: JSON.stringify(reports), 
-                note: "" 
-            } 
-        });
-
-        if (res.success) {
-            Swal.fire("Berhasil", res.message, "success");
-            nav("pageMenu");
-        } else {
-            throw new Error(res.error || "Gagal menyimpan");
-        }
-    } catch (err) {
-        Swal.close();
-        Swal.fire("Error", "Gagal mengirim laporan: " + err.message, "error");
-    }
+  } catch (err) {
+    Swal.close();
+    Swal.fire("Error", "Gagal mengirim laporan: " + err.message, "error");
+  }
 }
 
 /* =========================================
    DASHBOARD FUNCTIONS (DASHBOARD)
 ========================================= */
 async function loadDashboardProfile() {
-    const dashUser = localStorage.getItem("jef_dashboard_user");
-    if(!dashUser) return;
-    try {
-        let p = await callAPI({ action: "getUserProfile", username: dashUser });
-        document.getElementById("name").innerText = dashUser;
-        document.getElementById("position").innerHTML = "Jabatan : " + (p.position || "-");
-        document.getElementById("division").innerHTML = "Divisi : " + (p.division || "-");
-    } catch(e) { console.error("Profile load failed"); }
+  const dashUser = localStorage.getItem("jef_dashboard_user");
+  if (!dashUser) return;
+  try {
+    let p = await callAPI({ action: "getUserProfile", username: dashUser });
+    document.getElementById("name").innerText = dashUser;
+    document.getElementById("position").innerHTML =
+      "Jabatan : " + (p.position || "-");
+    document.getElementById("division").innerHTML =
+      "Divisi : " + (p.division || "-");
+  } catch (e) {
+    console.error("Profile load failed");
+  }
 }
 
 async function loadDashboardTasks() {
+  const dashUser = localStorage.getItem("jef_dashboard_user");
+  const filterDate = document.getElementById("filterDate");
+  const filterStatus = document.getElementById("filterStatus");
 
-    const dashUser = localStorage.getItem("jef_dashboard_user");
-    const filterDate = document.getElementById("filterDate");
-    const filterStatus = document.getElementById("filterStatus");
+  loader("Loading Dashboard...");
 
-    loader("Loading Dashboard...");
-
-    try {
-
-        dashboardTasks = await callAPI({
-            action: "getDashboardTasks",
-            username: dashUser,
-            date: filterDate.value
-        });
-
-        Swal.close();
-
-        pendingChanges={
-             create:[],
-             update:[],
-             delete:[]
-         };
-         
-         renderDashboard();
-
-    } catch(e){
-
-        Swal.close();
-        console.log(e);
-
-    }
-
-}
-
-function saveDetail(row,btn){
-
-    let card = btn.closest(".taskCard");
-
-    const data={
-
-        row:row,
-
-        startTime:
-        card.querySelector(".start").value,
-
-        endTime:
-        card.querySelector(".end").value,
-
-        output:
-        card.querySelector(".output").value,
-
-        issue:
-        card.querySelector(".issue").value
-
-    };
-
-    // update state dashboard lokal
-    let task=
-    dashboardTasks.find(
-        x=>x.row==row
-    );
-
-    if(task){
-
-        Object.assign(
-            task,
-            data
-        );
-
-    }
-
-    // update pending
-    const exist=
-    pendingChanges.update.find(
-        x=>x.row==row
-    );
-
-    if(exist){
-
-        Object.assign(
-            exist,
-            data
-        );
-
-    }else{
-
-        pendingChanges.update.push(
-            data
-        );
-
-    }
-
-    renderDashboard();
-
-    Swal.fire({
-        icon:"success",
-        title:"Perubahan disimpan sementara",
-        timer:1000,
-        showConfirmButton:false
+  try {
+    dashboardTasks = await callAPI({
+      action: "getDashboardTasks",
+      username: dashUser,
+      date: filterDate.value,
     });
 
+    Swal.close();
+
+    pendingChanges = {
+      create: [],
+      update: [],
+      delete: [],
+    };
+
+    renderDashboard();
+  } catch (e) {
+    Swal.close();
+    console.log(e);
+  }
 }
 
-async function editTask(row){
+function saveDetail(row, btn) {
+  let card = btn.closest(".taskCard");
 
-    let task=
-    dashboardTasks.find(
-        x=>x.row==row
-    );
+  const data = {
+    row: row,
 
-    if(!task)return;
+    startTime: card.querySelector(".start").value,
 
-    const p=
-    await Swal.fire({
+    endTime: card.querySelector(".end").value,
 
-        title:"Edit Task",
+    output: card.querySelector(".output").value,
 
-        html:`
+    issue: card.querySelector(".issue").value,
+  };
+
+  // update state dashboard lokal
+  let task = dashboardTasks.find((x) => x.row == row);
+
+  if (task) {
+    Object.assign(task, data);
+  }
+
+  // update pending
+  const exist = pendingChanges.update.find((x) => x.row == row);
+
+  if (exist) {
+    Object.assign(exist, data);
+  } else {
+    pendingChanges.update.push(data);
+  }
+
+  renderDashboard();
+
+  Swal.fire({
+    icon: "success",
+    title: "Perubahan disimpan sementara",
+    timer: 1000,
+    showConfirmButton: false,
+  });
+}
+
+async function editTask(row) {
+  let task = dashboardTasks.find((x) => x.row == row);
+
+  if (!task) return;
+
+  const p = await Swal.fire({
+    title: "Edit Task",
+
+    html: `
 
         <input
         id="t1"
@@ -571,228 +540,175 @@ async function editTask(row){
 
         `,
 
-        showCancelButton:true,
+    showCancelButton: true,
 
-        preConfirm:()=>({
+    preConfirm: () => ({
+      task: document.getElementById("t1").value,
 
-            task:
-            document.getElementById(
-                "t1"
-            ).value,
+      target: document.getElementById("t2").value,
+    }),
+  });
 
-            target:
-            document.getElementById(
-                "t2"
-            ).value
+  if (!p.value) return;
 
-        })
+  // update lokal
+  task.task = p.value.task;
 
-    });
+  task.target = p.value.target;
 
-    if(!p.value)return;
+  const updateData = {
+    row: row,
+    task: task.task,
+    target: task.target,
+  };
 
-    // update lokal
-    task.task=
-    p.value.task;
+  const exist = pendingChanges.update.find((x) => x.row == row);
 
-    task.target=
-    p.value.target;
+  if (exist) {
+    Object.assign(exist, updateData);
+  } else {
+    pendingChanges.update.push(updateData);
+  }
 
-    const updateData={
-
-        row:row,
-        task:task.task,
-        target:task.target
-
-    };
-
-    const exist=
-    pendingChanges.update.find(
-        x=>x.row==row
-    );
-
-    if(exist){
-
-        Object.assign(
-            exist,
-            updateData
-        );
-
-    }else{
-
-        pendingChanges.update.push(
-            updateData
-        );
-
-    }
-
-    renderDashboard();
-
+  renderDashboard();
 }
 
 /* =========================================
    DELETE TASK LOGIC (DASHBOARD)
 ========================================= */
-async function deleteTask(row){
+async function deleteTask(row) {
+  const confirm = await Swal.fire({
+    title: "Hapus Task?",
 
-    const confirm=
-    await Swal.fire({
+    icon: "warning",
 
-        title:"Hapus Task?",
+    showCancelButton: true,
+  });
 
-        icon:"warning",
+  if (!confirm.isConfirmed) return;
 
-        showCancelButton:true
+  dashboardTasks = dashboardTasks.filter((x) => x.row != row);
 
-    });
+  // cegah duplikat
+  if (!pendingChanges.delete.includes(row)) {
+    pendingChanges.delete.push(row);
+  }
 
-    if(!confirm.isConfirmed)
-    return;
-
-    dashboardTasks=
-    dashboardTasks.filter(
-        x=>x.row!=row
-    );
-
-    // cegah duplikat
-    if(
-        !pendingChanges.delete.includes(
-            row
-        )
-    ){
-
-        pendingChanges.delete.push(
-            row
-        );
-
-    }
-
-    renderDashboard();
-
+  renderDashboard();
 }
 
 /* =========================================
    APP CORE (EXIT, PWA, AUTO LOGIN)
 ========================================= */
 function confirmExit() {
-    Swal.fire({
-        title: "Keluar dari aplikasi?",
-        text: "Kamu harus login kembali nanti.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#f5c451",
-        confirmButtonText: "Ya, keluar",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.removeItem("jef_user_logged");
-            localStorage.removeItem("jef_user_name");
-            location.reload();
-        }
-    });
+  Swal.fire({
+    title: "Keluar dari aplikasi?",
+    text: "Kamu harus login kembali nanti.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonColor: "#f5c451",
+    confirmButtonText: "Ya, keluar",
+  }).then((result) => {
+    if (result.isConfirmed) {
+      localStorage.removeItem("jef_user_logged");
+      localStorage.removeItem("jef_user_name");
+      location.reload();
+    }
+  });
 }
 
 function openDashboard() {
-    localStorage.setItem("jef_dashboard_user", user);
-    window.location.href = "./dashboard.html";
+  localStorage.setItem("jef_dashboard_user", user);
+  window.location.href = "./dashboard.html";
 }
 
 // Global App Initialization
 window.onload = function () {
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+  updateDateTime();
+  setInterval(updateDateTime, 1000);
 
-    // Cek apakah ini halaman Dashboard atau Index
-    const isDashboard = !!document.getElementById("taskContainer");
+  // Cek apakah ini halaman Dashboard atau Index
+  const isDashboard = !!document.getElementById("taskContainer");
 
-    if (isDashboard) {
-        // Init Halaman Dashboard
-        loadDashboardProfile();
-        loadDashboardTasks();
-    } else {
-        // Init Halaman Index
-        const savedUser = localStorage.getItem("jef_user_logged");
-        const savedName = localStorage.getItem("jef_user_name");
-        if (savedUser && savedName) {
-            user = savedUser;
-            const userLabel = document.getElementById("userLabel");
-            if(userLabel) userLabel.innerText = savedName;
-            nav("pageMenu");
-        }
+  if (isDashboard) {
+    // Init Halaman Dashboard
+    loadDashboardProfile();
+    loadDashboardTasks();
+  } else {
+    // Init Halaman Index
+    const savedUser = localStorage.getItem("jef_user_logged");
+    const savedName = localStorage.getItem("jef_user_name");
+    if (savedUser && savedName) {
+      user = savedUser;
+      const userLabel = document.getElementById("userLabel");
+      if (userLabel) userLabel.innerText = savedName;
+      nav("pageMenu");
     }
+  }
 };
 
 /* =========================================
    SERVICE WORKER & PWA INSTALL
 ========================================= */
 if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-        navigator.serviceWorker.register("/sw.js")
-            .then((reg) => console.log("SW Registered!", reg))
-            .catch((err) => console.log("SW Registration failed:", err));
-    });
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((reg) => console.log("SW Registered!", reg))
+      .catch((err) => console.log("SW Registration failed:", err));
+  });
 }
 
 window.addEventListener("beforeinstallprompt", (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const installBtn = document.getElementById("installBtn");
-    if (installBtn) installBtn.style.display = "block";
-    if (localStorage.getItem("jef_user_logged")) {
-        setTimeout(() => {
-            const modal = document.getElementById("pwaInstallModal");
-            if (modal) modal.style.display = "flex";
-        }, 3000);
-    }
+  e.preventDefault();
+  deferredPrompt = e;
+  const installBtn = document.getElementById("installBtn");
+  if (installBtn) installBtn.style.display = "block";
+  if (localStorage.getItem("jef_user_logged")) {
+    setTimeout(() => {
+      const modal = document.getElementById("pwaInstallModal");
+      if (modal) modal.style.display = "flex";
+    }, 3000);
+  }
 });
 
 async function triggerInstall() {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === "accepted") {
-        const btn = document.getElementById("installBtn");
-        if(btn) btn.style.display = "none";
-    }
-    deferredPrompt = null;
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  if (outcome === "accepted") {
+    const btn = document.getElementById("installBtn");
+    if (btn) btn.style.display = "none";
+  }
+  deferredPrompt = null;
 }
 
 async function executePwaInstall() {
-    if (!deferredPrompt) return;
-    closePwaModal();
-    deferredPrompt.prompt();
-    deferredPrompt = null;
+  if (!deferredPrompt) return;
+  closePwaModal();
+  deferredPrompt.prompt();
+  deferredPrompt = null;
 }
 
 function closePwaModal() {
-    const modal = document.getElementById("pwaInstallModal");
-    if (modal) modal.style.display = "none";
+  const modal = document.getElementById("pwaInstallModal");
+  if (modal) modal.style.display = "none";
 }
 
+function renderDashboard() {
+  let tasks = [...dashboardTasks];
 
-function renderDashboard(){
+  const status = document.getElementById("filterStatus").value;
 
-    let tasks=[...dashboardTasks];
+  if (status) {
+    tasks = tasks.filter((x) => x.status === status);
+  }
 
-    const status=
-    document.getElementById("filterStatus").value;
+  let done = tasks.filter((x) => x.status === "DONE").length;
 
-    if(status){
-        tasks=tasks.filter(
-            x=>x.status===status
-        );
-    }
+  let pending = tasks.filter((x) => x.status !== "DONE").length;
 
-    let done=
-    tasks.filter(
-        x=>x.status==="DONE"
-    ).length;
-
-    let pending=
-    tasks.filter(
-        x=>x.status!=="DONE"
-    ).length;
-
-    document.getElementById("stats").innerHTML=`
+  document.getElementById("stats").innerHTML = `
     <div class='cardx'>
         <div class='row text-center'>
 
@@ -811,11 +727,10 @@ function renderDashboard(){
         </div>
     </div>`;
 
-    let html="";
+  let html = "";
 
-    tasks.forEach((t)=>{
-
-        html+=`
+  tasks.forEach((t) => {
+    html += `
 
         <div class='taskCard' data-row='${t.row}'>
 
@@ -826,7 +741,7 @@ function renderDashboard(){
         <small>${t.target}</small>
         </div>
 
-        <span class='badge ${t.status=="DONE"?"badgeDone":"badgePending"}'>
+        <span class='badge ${t.status == "DONE" ? "badgeDone" : "badgePending"}'>
         ${t.status}
         </span>
 
@@ -836,22 +751,22 @@ function renderDashboard(){
 
         <div class='col-md-6'>
         <input class='form-control start'
-        value='${t.startTime||""}'>
+        value='${t.startTime || ""}'>
         </div>
 
         <div class='col-md-6'>
         <input class='form-control end'
-        value='${t.endTime||""}'>
+        value='${t.endTime || ""}'>
         </div>
 
         <div class='col-md-6 mt-2'>
         <input class='form-control output'
-        value='${t.output||""}'>
+        value='${t.output || ""}'>
         </div>
 
         <div class='col-md-6 mt-2'>
         <input class='form-control issue'
-        value='${t.issue||""}'>
+        value='${t.issue || ""}'>
         </div>
 
         </div>
@@ -877,10 +792,9 @@ function renderDashboard(){
 
         </div>
         `;
+  });
 
-    });
-
-    html+=`
+  html += `
 
     <div class='mt-4 text-center gap-2'>
 
@@ -905,81 +819,45 @@ Refresh
 
     `;
 
-    document.getElementById(
-    "taskContainer"
-    ).innerHTML=html;
-
+  document.getElementById("taskContainer").innerHTML = html;
 }
 
-function totalPending(){
-
-    return (
-        pendingChanges.create.length+
-        pendingChanges.update.length+
-        pendingChanges.delete.length
-    );
-
+function totalPending() {
+  return (
+    pendingChanges.create.length +
+    pendingChanges.update.length +
+    pendingChanges.delete.length
+  );
 }
 
-async function saveAllChanges(){
+async function saveAllChanges() {
+  if (totalPending() == 0) {
+    return Swal.fire("Info", "Tidak ada perubahan", "info");
+  }
 
-    if(
-        totalPending()==0
-    ){
+  loader("Menyimpan...");
 
-        return Swal.fire(
-            "Info",
-            "Tidak ada perubahan",
-            "info"
-        );
+  try {
+    const res = await callAPI({
+      action: "batchUpdate",
 
-    }
+      payload: pendingChanges,
+    });
 
-    loader(
-        "Menyimpan..."
-    );
+    Swal.close();
 
-    try{
+    pendingChanges = {
+      create: [],
+      update: [],
+      delete: [],
+    };
 
-        const res=
-        await callAPI({
+    Swal.fire("Berhasil", "Semua perubahan tersimpan", "success");
 
-            action:
-            "batchUpdate",
+    loadDashboardTasks();
+  } catch (e) {
+    Swal.close();
 
-            payload:
-            pendingChanges
-
-        });
-
-        Swal.close();
-
-        pendingChanges={
-
-            create:[],
-            update:[],
-            delete:[]
-
-        };
-
-        Swal.fire(
-            "Berhasil",
-            "Semua perubahan tersimpan",
-            "success"
-        );
-
-        loadDashboardTasks();
-
-    }catch(e){
-
-        Swal.close();
-
-        Swal.fire(
-            "Error",
-            e.toString(),
-            "error"
-        );
-
-    }
-
+    Swal.fire("Error", e.toString(), "error");
+  }
 }
