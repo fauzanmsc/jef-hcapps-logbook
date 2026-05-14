@@ -1,7 +1,7 @@
 /* =========================================
    CONFIG & GLOBAL VARIABLES
 ========================================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby8gdFUTmrgBnmgUqFimuMFs_ZaJw_AWkyRVfBco0VmQrb4bZC6zLvKLT-c7aGV0EvOhw/exec";
+const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyoJMMrNzST3TKi6_O0TvdE3UTPsfrJeVA4SN-LfqpnZarIbOQ2eO56zEdG49NhHxnxGw/exec";
 
 let user = localStorage.getItem("jef_user_logged") || "";
 let deferredPrompt = null;
