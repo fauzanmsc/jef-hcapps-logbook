@@ -340,41 +340,61 @@ async function showReport() {
 async function finalReport() {
     let reports = [];
     let isAllValid = true;
-    const reportItems = document.querySelectorAll(".report-item");
+    
+    // PERUBAHAN: Selector diganti dari .report-item menjadi .report-card
+    const reportItems = document.querySelectorAll(".report-card"); 
+    
     if (reportItems.length === 0) return;
 
     reportItems.forEach((div) => {
-        const startTime = div.querySelector(".r-start").value;
-        const endTime = div.querySelector(".r-end").value;
-        const output = div.querySelector(".r-out").value;
+        const startTime = div.querySelector(".r-start").value.trim();
+        const endTime = div.querySelector(".r-end").value.trim();
+        const output = div.querySelector(".r-out").value.trim();
         const completed = div.querySelector(".r-c").checked;
 
-        if (!startTime || !endTime || !output || !completed) {
+        // PERUBAHAN: Validasi visual. Issue bersifat opsional, jadi tidak masuk validasi wajib.
+        if (!startTime || !endTime || !output) {
             isAllValid = false;
-            div.style.border = "2px solid #ff4d4d";
+            div.style.border = "2px solid #ff4d4d"; // Border merah jika kosong
         } else {
-            div.style.border = "none";
-            div.style.borderLeft = "5px solid #f5c451";
+            div.style.border = "1px solid #333"; // Kembalikan ke normal
         }
 
         reports.push({
             row: div.dataset.row,
-            startTime, endTime, output,
+            startTime, 
+            endTime, 
+            output,
             issue: div.querySelector(".r-iss").value || "-",
-            completed,
+            completed: completed,
         });
     });
 
-    if (!isAllValid) return Swal.fire("Oops!", 'Mohon lengkapi Jam, Output, dan centang "Ya, Selesai".', "warning");
+    // PERUBAHAN: Pesan peringatan lebih jelas
+    if (!isAllValid) {
+        return Swal.fire("Oops!", "Mohon lengkapi Jam Mulai, Selesai, dan Output Hasil pada setiap tugas.", "warning");
+    }
 
     try {
         loader("Mengirim Report...");
-        const res = await callAPI({ action: "submitReport", data: { reports: JSON.stringify(reports), note: "" } });
-        Swal.fire("Berhasil", res.message, "success");
-        nav("pageMenu");
+        // Mengirim data ke action "submitReport"
+        const res = await callAPI({ 
+            action: "submitReport", 
+            data: { 
+                reports: JSON.stringify(reports), 
+                note: "" 
+            } 
+        });
+
+        if (res.success) {
+            Swal.fire("Berhasil", res.message, "success");
+            nav("pageMenu");
+        } else {
+            throw new Error(res.error || "Gagal menyimpan");
+        }
     } catch (err) {
         Swal.close();
-        Swal.fire("Error", "Gagal mengirim laporan ke server.", "error");
+        Swal.fire("Error", "Gagal mengirim laporan: " + err.message, "error");
     }
 }
 
