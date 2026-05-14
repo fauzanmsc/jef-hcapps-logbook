@@ -165,7 +165,7 @@ async function doLogin() {
 ========================================= */
 async function showPlan() {
   try {
-    loader("Memuat logbook...");
+    loader("Memuat Logbook...");
     const p = await callAPI({ action: "getUserProfile", username: user });
     Swal.close();
 
@@ -393,7 +393,7 @@ async function finalReport() {
   if (!isAllValid) {
     return Swal.fire(
       "Oops!",
-      "Mohon lengkapi Jam Mulai, Selesai, dan Output Hasil pada setiap task.",
+      "Mohon lengkapi data agar laporan bisa terkirim.",
       "warning",
     );
   }
@@ -616,6 +616,12 @@ function openDashboard() {
 }
 
 // Global App Initialization
+function hideInitialLoader() {
+  const loader = document.getElementById("initialLoader");
+  if (!loader) return;
+  loader.classList.add("hidden");
+}
+
 window.onload = function () {
   updateDateTime();
   setInterval(updateDateTime, 1000);
@@ -638,6 +644,8 @@ window.onload = function () {
       nav("pageMenu");
     }
   }
+
+  setTimeout(hideInitialLoader, 500);
 };
 
 /* =========================================
