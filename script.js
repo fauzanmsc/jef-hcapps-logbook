@@ -319,14 +319,14 @@ async function showReport() {
                             <label class="form-label small text-uppercase fw-bold text-muted">Mulai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-play"></i></span>
-                                <input type="text" class="form-control timepicker r-start" placeholder="00:00">
+                                <input type="text" class="form-control timepicker r-start input-group-text bg-dark border-secondary text-muted" placeholder="00:00">
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label small text-uppercase fw-bold text-muted">Selesai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-stop"></i></span>
-                                <input type="text" class="form-control timepicker r-end" placeholder="00:00">
+                                <input type="text" class="form-control timepicker r-end input-group-text bg-dark border-secondary text-muted" placeholder="00:00">
                             </div>
                         </div>
                         
