@@ -209,6 +209,39 @@ async function submitPlan() {
     }
 }
 
+// async function showReport() {
+//     try {
+//         loader("Memeriksa tugas aktif...");
+//         const tasks = await callAPI({ action: "getActiveTasks", username: user });
+//         Swal.close();
+
+//         if (!tasks || tasks.length === 0) {
+//             return Swal.fire({ title: "Tugas Tidak Ditemukan", text: "Tidak ada tugas aktif saat ini.", icon: "info" });
+//         }
+
+//         let h = "";
+//         tasks.forEach((t, i) => {
+//             if (!t.row) return;
+//             h += `<div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding:18px;border-radius:16px;border-left:3px solid #f5c451;">
+//                 <div class="mb-2"><span class="badge bg-primary text-dark mb-1">TASK ${i + 1}</span><p class="mb-1 fw-bold text-white small">${t.task}</p><small class="text-muted d-block mb-3">Target: ${t.target}</small></div>
+//                 <div class="row g-2">
+//                     <div class="col-6"><label class="small fw-semibold mb-2">Waktu Mulai*</label><input type="text" class="form-control timepicker r-start" placeholder="00:00"></div>
+//                     <div class="col-6"><label class="small fw-semibold mb-2">Waktu Selesai*</label><input type="text" class="form-control timepicker r-end" placeholder="00:00"></div>
+//                     <div class="col-12 mt-2"><input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib)*"></div>
+//                     <div class="col-12"><input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Opsional)"></div>
+//                     <div class="col-12 mt-2"><div class="form-check modern-check m-0"><input class="form-check-input r-c" type="checkbox"><label class="form-check-label text-white small">Ya, Selesai</label></div></div>
+//                 </div>
+//             </div>`;
+//         });
+//         document.getElementById("reportContainer").innerHTML = h;
+//         initTimePicker();
+//         nav("pageReport");
+//     } catch (err) {
+//         Swal.close();
+//         Swal.fire("System Error", err.toString(), "error");
+//     }
+// }
+
 async function showReport() {
     try {
         loader("Memeriksa tugas aktif...");
@@ -216,23 +249,85 @@ async function showReport() {
         Swal.close();
 
         if (!tasks || tasks.length === 0) {
-            return Swal.fire({ title: "Tugas Tidak Ditemukan", text: "Tidak ada tugas aktif saat ini.", icon: "info" });
+            return Swal.fire({ 
+                title: "Tugas Tidak Ditemukan", 
+                text: "Tidak ada tugas aktif saat ini.", 
+                icon: "info",
+                confirmButtonColor: "#3085d6"
+            });
         }
 
-        let h = "";
+        // Header Dashboard Sederhana
+        let h = `
+            <div class="dashboard-header mb-4 px-2">
+                <h4 class="fw-bold mb-1 text-white">Laporan Harian</h4>
+                <p class="text-muted small">Ditemukan ${tasks.length} tugas yang perlu dilaporkan.</p>
+            </div>
+        `;
+
         tasks.forEach((t, i) => {
             if (!t.row) return;
-            h += `<div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding:18px;border-radius:16px;border-left:3px solid #f5c451;">
-                <div class="mb-2"><span class="badge bg-primary text-dark mb-1">TASK ${i + 1}</span><p class="mb-1 fw-bold text-white small">${t.task}</p><small class="text-muted d-block mb-3">Target: ${t.target}</small></div>
-                <div class="row g-2">
-                    <div class="col-6"><label class="small fw-semibold mb-2">Waktu Mulai*</label><input type="text" class="form-control timepicker r-start" placeholder="00:00"></div>
-                    <div class="col-6"><label class="small fw-semibold mb-2">Waktu Selesai*</label><input type="text" class="form-control timepicker r-end" placeholder="00:00"></div>
-                    <div class="col-12 mt-2"><input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib)*"></div>
-                    <div class="col-12"><input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala/Issue (Opsional)"></div>
-                    <div class="col-12 mt-2"><div class="form-check modern-check m-0"><input class="form-check-input r-c" type="checkbox"><label class="form-check-label text-white small">Ya, Selesai</label></div></div>
+            h += `
+            <div class="report-card mb-4 overflow-hidden shadow-sm" data-row="${t.row}" 
+                 style="background: #1e1e2e; border-radius: 20px; border: 1px solid #333;">
+                
+                <!-- Card Header -->
+                <div class="p-3 d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.03);">
+                    <span class="badge rounded-pill px-3 py-2" style="background: #f5c451; color: #000;">Tugas #${i + 1}</span>
+                    <i class="bi bi-clock-history text-muted"></i>
+                </div>
+
+                <div class="p-4">
+                    <!-- Task Info -->
+                    <div class="task-info mb-4">
+                        <h6 class="text-white fw-bold mb-1">${t.task}</h6>
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-geo-alt-fill me-1 small"></i>
+                            <span style="font-size: 0.85rem;">Target: ${t.target}</span>
+                        </div>
+                    </div>
+
+                    <!-- Input Grid -->
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase fw-bold text-muted">Mulai</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-play"></i></span>
+                                <input type="text" class="form-control bg-dark text-white border-secondary timepicker r-start" placeholder="00:00">
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small text-uppercase fw-bold text-muted">Selesai</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-stop"></i></span>
+                                <input type="text" class="form-control bg-dark text-white border-secondary timepicker r-end" placeholder="00:00">
+                            </div>
+                        </div>
+                        
+                        <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-muted">Output Hasil</label>
+                            <textarea class="form-control bg-dark text-white border-secondary r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?"></textarea>
+                        </div>
+
+                        <div class="col-12">
+                            <label class="form-label small text-uppercase fw-bold text-muted">Kendala (Opsional)</label>
+                            <input type="text" class="form-control bg-dark text-white border-secondary r-iss" placeholder="Ada hambatan?">
+                        </div>
+
+                        <!-- Completion Status -->
+                        <div class="col-12 mt-3">
+                            <div class="completion-toggle p-3 rounded-3 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.05);">
+                                <label class="form-check-label text-white fw-medium m-0">Tandai Sudah Selesai</label>
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input r-c" type="checkbox" style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>`;
         });
+
         document.getElementById("reportContainer").innerHTML = h;
         initTimePicker();
         nav("pageReport");

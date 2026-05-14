@@ -118,10 +118,9 @@
         margin-left: 0;
       }
 
-      /* Membuat switch checkbox berwarna kuning saat aktif */
       .form-check-input:checked {
-          background-color: #f5c451;
-          border-color: #f5c451;
+        background-color: #25d583;
+        border-color: #18ae68;
       }
 
       .form-check-input:focus {
@@ -488,10 +487,10 @@
       }
 
       .form-control:focus {
-          background-color: #2a2a3d !important;
-          border-color: #f5c451 !important;
-          box-shadow: none;
-          color: white !important;
+        box-shadow: 0 0 0 4px rgba(245, 196, 81, 0.15);
+        border-color: var(--gold);
+        background: #333333;
+        color: white;
       }
 
       .time-box input.text-center {
@@ -625,7 +624,6 @@
 
       .form-control {
         font-size: 0.9rem !important;
-        border-left: none !important;
       }
 
       .time-box:focus-within {
