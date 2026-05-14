@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700&family=Comfortaa:wght@300;400;500;700&display=swap');
+
 :root {
   --bg-main: #0f0f0f;
   --bg-card: #171717;
@@ -1505,10 +1507,24 @@ select:-webkit-autofill {
   opacity: 0.85;
 }
 
+.dash-avatar{
+font-size: 30px;
+}
+
+.akses-logbook{
+  background: #e9e9d4!important;
+padding: 15px 15px;
+}
+
+.akses-logbook:hover{
+  background: #ffffcb!important;
+  box-shadow: -1px 3px 15px rgba(214, 161, 49, 0.6);
+
+}
+
 @media (max-width: 480px) {
   .bento-card {
     padding: 18px;
-    border-radius: 0 0 18px 18px;
     width: 340px;
   }
 
