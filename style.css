@@ -100,7 +100,7 @@
         font-family: "Plus Jakarta Sans", sans-serif;
         min-height: 100vh;
         margin: 0;
-        padding: 20px 16px 80px;
+        padding: 20px 16px 0px;
         color: var(--text);
         overflow-x: hidden;
       }
@@ -656,7 +656,7 @@
       }
 
       .app-footer {
-        position: fixed;
+        position: absolute;
         bottom: 0;
         left: 0;
 
