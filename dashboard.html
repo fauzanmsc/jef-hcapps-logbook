@@ -1,1 +1,271 @@
-INI DASHBOARD
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JEF Dashboard</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+body{
+background:#111;
+color:white;
+margin:0;
+font-family:Arial,sans-serif;
+}
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+width:250px;
+height:100vh;
+background:#1b1b1b;
+padding:25px;
+border-right:1px solid #333;
+}
+.sidebar .menu{
+padding:14px;
+border-radius:12px;
+margin-bottom:10px;
+cursor:pointer;
+background:#252525;
+}
+.sidebar .menu:hover{
+background:#d8a52c;
+color:black;
+}
+.content{
+margin-left:270px;
+padding:25px;
+}
+.card-dark{
+background:#1d1d1d;
+border-radius:20px;
+padding:20px;
+}
+.table{
+color:white;
+}
+.table thead{
+background:#d8a52c;
+color:black;
+}
+.table-responsive{
+overflow:auto;
+border-radius:15px;
+}
+.action-btn{
+border:none;
+padding:8px 10px;
+border-radius:10px;
+}
+@media(max-width:768px){
+.sidebar{
+width:100%;
+height:auto;
+position:relative;
+}
+.content{
+margin-left:0;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar">
+<h4>JEF Dashboard</h4>
+<hr>
+<div class="menu">
+<i class="bi bi-grid"></i> Dashboard
+</div>
+<div class="menu" onclick="window.location='index.html'">
+<i class="bi bi-journal"></i> Daily Logbook
+</div>
+<div class="menu" onclick="logout()">
+<i class="bi bi-box-arrow-right"></i> Logout
+</div>
+</div>
+
+<div class="content">
+
+<div class="card-dark mb-4">
+<div class="row g-2">
+<div class="col-md-4">
+<input id="filterDate" type="date" class="form-control">
+</div>
+<div class="col-md-4">
+<button class="btn btn-warning w-100" onclick="loadTasks()">
+<i class="bi bi-search"></i> Filter
+</button>
+</div>
+<div class="col-md-4">
+<button class="btn btn-success w-100" onclick="addTask()">
+<i class="bi bi-plus-circle"></i> Tambah Tugas
+</button>
+</div>
+</div>
+</div>
+
+<div class="card-dark">
+<div class="table-responsive">
+<table class="table align-middle">
+<thead>
+<tr>
+<th>Tanggal</th>
+<th>Task</th>
+<th>Target</th>
+<th>Status</th>
+<th>Aksi</th>
+</tr>
+</thead>
+<tbody id="taskBody"></tbody>
+</table>
+</div>
+</div>
+
+</div>
+
+<script>
+const WEB_APP_URL='ISI_WEBAPP_URL';
+const user=localStorage.getItem('jef_user_logged');
+
+async function callAPI(payload){
+let r=await fetch(WEB_APP_URL,{
+method:'POST',
+headers:{'Content-Type':'application/x-www-form-urlencoded'},
+body:'data='+encodeURIComponent(JSON.stringify(payload))
+});
+return await r.json();
+}
+
+async function loadTasks(){
+
+let date=document.getElementById('filterDate').value;
+
+let res=await callAPI({
+action:'getDashboardTasks',
+username:user,
+date:date
+});
+
+let html='';
+
+res.data.forEach(d=>{
+
+html+=`
+<tr>
+<td>${d.date||'-'}</td>
+<td>${d.task||'-'}</td>
+<td>${d.target||'-'}</td>
+<td>
+<span class='badge bg-${d.status=='DONE'?'success':'warning'}'>
+${d.status||'PENDING'}
+</span>
+</td>
+<td>
+<button class='action-btn btn-warning' onclick="editTask('${d.id}','${d.task}','${d.target}','${d.date}')">
+<i class='bi bi-pencil'></i>
+</button>
+<button class='action-btn btn-danger' onclick="deleteTask('${d.id}')">
+<i class='bi bi-trash'></i>
+</button>
+</td>
+</tr>`;
+
+})
+
+document.getElementById('taskBody').innerHTML=html;
+}
+
+async function addTask(){
+
+const{value:form}=await Swal.fire({
+title:'Tambah Task',
+html:`
+<input id=t1 class='swal2-input' placeholder='Task'>
+<input id=t2 class='swal2-input' placeholder='Target'>
+<input id=t3 type='date' class='swal2-input'>
+`,
+preConfirm:()=>({
+task:t1.value,
+target:t2.value,
+date:t3.value
+})
+});
+
+if(!form)return;
+
+await callAPI({
+action:'addDashboardTask',
+data:{
+username:user,
+position:'-',
+division:'-',
+task:form.task,
+target:form.target,
+date:form.date
+}
+});
+
+loadTasks();
+}
+
+async function editTask(id,task,target,date){
+
+const{value:form}=await Swal.fire({
+title:'Edit Task',
+html:`
+<input id=t1 value='${task}' class='swal2-input'>
+<input id=t2 value='${target}' class='swal2-input'>
+<input id=t3 value='${date}' type='date' class='swal2-input'>
+`,
+preConfirm:()=>({
+task:t1.value,
+target:t2.value,
+date:t3.value
+})
+});
+
+if(!form)return;
+
+await callAPI({
+action:'updateDashboardTask',
+data:{
+id:id,
+task:form.task,
+target:form.target,
+date:form.date
+}
+});
+
+loadTasks();
+}
+
+async function deleteTask(id){
+
+let x=await Swal.fire({
+title:'Hapus task?',
+showCancelButton:true
+});
+
+if(!x.isConfirmed)return;
+
+await callAPI({
+action:'deleteDashboardTask',id:id});
+loadTasks();
+}
+
+function logout(){
+localStorage.clear();
+location='index.html';
+}
+
+loadTasks();
+</script>
+
+</body>
+</html>
+
