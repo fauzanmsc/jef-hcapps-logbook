@@ -278,12 +278,19 @@
         margin-bottom: 20px;
       }
 
+      .description-app {
+        font-size: 12px;
+    font-weight: 100;
+    color: #898888 !important;
+
+      }
+
       .bento-header {
         width: 480px;
         background: linear-gradient(135deg, #181818, #0f0f0f);
         color: white;
         border-radius: var(--card-radius);
-        padding: 35px 30px;
+        padding: 35px 10px;
         margin-bottom: 20px;
         text-align: center;
         border: 1px solid rgb(79 79 79 / 20%);
