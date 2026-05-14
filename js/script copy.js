@@ -483,11 +483,6 @@ function saveDetail(row, btn) {
     output: card.querySelector(".output").value,
 
     issue: card.querySelector(".issue").value,
-    // include status if present on the card
-    status:
-      (card.querySelector(".status-checkbox") &&
-        (card.querySelector(".status-checkbox").checked ? "DONE" : "PENDING")) ||
-      undefined,
   };
 
   // update state dashboard lokal
@@ -514,22 +509,6 @@ function saveDetail(row, btn) {
     timer: 1000,
     showConfirmButton: false,
   });
-}
-
-// Toggle status quickly from checkbox (updates local state + pendingChanges)
-function toggleTaskStatus(row, checked) {
-  const status = checked ? "DONE" : "PENDING";
-  let task = dashboardTasks.find((x) => x.row == row);
-  if (task) task.status = status;
-
-  const exist = pendingChanges.update.find((x) => x.row == row);
-  const data = { row: row, status: status };
-  if (exist) {
-    Object.assign(exist, data);
-  } else {
-    pendingChanges.update.push(data);
-  }
-  renderDashboard();
 }
 
 async function editTask(row) {
@@ -730,24 +709,23 @@ function renderDashboard() {
 
   let pending = tasks.filter((x) => x.status !== "DONE").length;
 
-  // Stats with UI-friendly icons
   document.getElementById("stats").innerHTML = `
-    <div class='stats-grid mb-4'>
-      <div class='stat-card'>
-        <i class="bi bi-list" style="font-size:20px;"></i>
-        <h5>${tasks.length}</h5>
-        <small>Total</small>
-      </div>
-      <div class='stat-card'>
-        <i class="bi bi-check-circle-fill" style="font-size:20px;"></i>
-        <h5>${done}</h5>
-        <small>Done</small>
-      </div>
-      <div class='stat-card'>
-        <i class="bi bi-hourglass-split" style="font-size:20px;"></i>
-        <h5>${pending}</h5>
-        <small>Pending</small>
-      </div>
+    <div class='cardx'>
+        <div class='row text-center'>
+
+        <div class='col'>
+        📋<h4>${tasks.length}</h4>Total
+        </div>
+
+        <div class='col'>
+        ✅<h4>${done}</h4>Done
+        </div>
+
+        <div class='col'>
+        ⌛<h4>${pending}</h4>Pending
+        </div>
+
+        </div>
     </div>`;
 
   let html = "";
@@ -761,7 +739,7 @@ function renderDashboard() {
 
         <div>
         <h5>${t.task}</h5>
-        <small class='text-muted'>${t.target}</small>
+        <small>${t.target}</small>
         </div>
 
         <span class='badge ${t.status == "DONE" ? "badgeDone" : "badgePending"}'>
@@ -790,13 +768,6 @@ function renderDashboard() {
         <div class='col-md-6 mt-2'>
         <input class='form-control issue'
         value='${t.issue || ""}'>
-        </div>
-
-        <div class='col-12 mt-2'>
-          <div class='form-check modern-check m-0'>
-            <input id='status-${t.row}' class='form-check-input status-checkbox' type='checkbox' ${t.status == "DONE" ? "checked" : ""} onchange='toggleTaskStatus(${t.row}, this.checked)'>
-            <label class='form-check-label text-white small' for='status-${t.row}'>Ya, Selesai</label>
-          </div>
         </div>
 
         </div>

@@ -1,147 +1,446 @@
 <!doctype html>
 <html>
   <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>JEF Dashboard Task</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <base target="_top" />
+    <title>JEF Dashboard - Task Management</title>
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-    />
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="/js/manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="JEF DASHBOARD" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="/images/png/jef-icons.png" />
+    <link rel="apple-touch-icon" href="/images/png/jef-icons.png" />
+
+    <!-- Theme -->
+    <meta name="theme-color" content="#1a1a1a" />
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="/css/style.css" />
     <script src="/js/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-      body {
-        background: #0f0f0f;
-        color: white;
-        padding: 20px;
+      .dashboard-container {
+        max-width: 480px;
+        margin: 0 auto;
+        padding: 20px 16px 80px;
       }
 
-      .cardx {
-        background: #171717;
-        border-radius: 25px;
-        padding: 20px;
-        margin-bottom: 15px;
-        border: 1px solid #292929;
-      }
-
-      .profile {
+      .dashboard-header {
         display: flex;
         align-items: center;
-        gap: 15px;
+        gap: 16px;
+        margin-bottom: 24px;
       }
 
-      .avatar {
-        width: 70px;
-        height: 70px;
+      .dashboard-avatar {
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #f5c451, #d8a52c);
+        background: linear-gradient(145deg, #a87e00, #ffdcb0);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 30px;
-        color: black;
+        font-size: 36px;
+        color: white;
         font-weight: bold;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+        border: 3px solid #d6a131;
       }
 
-      .taskCard {
-        background: #1f1f1f;
+      .dashboard-info h4 {
+        font-weight: 700;
+        margin-bottom: 4px;
+        color: #f5c451;
+      }
+
+      .dashboard-info small {
+        display: block;
+        color: #8d8d8d;
+        font-size: 0.85rem;
+      }
+
+      .filter-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .filter-section input,
+      .filter-section select {
+        background: #1a1a1a !important;
+        border: 1px solid rgba(245, 196, 81, 0.12) !important;
+        border-radius: 12px !important;
+        padding: 10px 12px !important;
+        color: white !important;
+        font-size: 0.9rem !important;
+      }
+
+      .filter-btn {
+        grid-column: 1 / -1;
+        background: linear-gradient(135deg, #f5c451, #d8a52c) !important;
+        color: #111 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        border-radius: 12px !important;
+        padding: 10px 16px !important;
+      }
+
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 24px;
+      }
+
+      .stat-card {
+        background: linear-gradient(135deg, #f5c451, #d8a52c);
+        border-radius: 16px;
+        padding: 16px;
+        text-align: center;
+        color: #111;
+        font-weight: 700;
+      }
+
+      .stat-card h5 {
+        font-size: 1.8rem;
+        margin: 8px 0 4px;
+      }
+
+      .stat-card small {
+        display: block;
+        font-size: 0.75rem;
+        opacity: 0.9;
+      }
+
+      .task-card {
+        background: rgba(23, 23, 23, 0.95);
+        backdrop-filter: blur(14px);
+        border: 1px solid rgb(79 79 79 / 20%);
         border-radius: 20px;
         padding: 20px;
-        margin-top: 15px;
-        border-left: 4px solid #f5c451;
-        transition: 0.3s;
+        margin-bottom: 16px;
+        transition: all 0.3s ease;
       }
 
-      .taskCard:hover {
-        transform: translateY(-3px);
+      .task-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 30px rgba(245, 196, 81, 0.15);
       }
 
-      .btn-jef {
-        background: linear-gradient(135deg, #f5c451, #d8a52c);
-        border: none;
-        font-weight: bold;
-        color: black;
+      .task-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
       }
 
-      .badgeDone {
+      .task-title {
+        font-weight: 700;
+        font-size: 1rem;
+        margin-bottom: 4px;
+      }
+
+      .task-target {
+        font-size: 0.85rem;
+        color: #8d8d8d;
+      }
+
+      .badge-done {
         background: #25d583;
-        padding: 8px 12px;
+        color: white;
+        padding: 6px 12px;
         border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
       }
 
-      .badgePending {
+      .badge-pending {
         background: #666;
-        padding: 8px 12px;
+        color: white;
+        padding: 6px 12px;
         border-radius: 20px;
+        font-size: 0.75rem;
+        font-weight: 700;
       }
 
-      input,
-      select,
-      textarea {
-        background: #262626 !important;
+      .task-inputs {
+        display: grid;
+        gap: 12px;
+        margin-top: 12px;
+      }
+
+      .task-inputs input {
+        background: #141414 !important;
+        border: 1px solid rgba(245, 196, 81, 0.12) !important;
+        border-radius: 10px !important;
+        padding: 10px 12px !important;
         color: white !important;
-        border: 1px solid #444 !important;
+        font-size: 0.9rem !important;
       }
 
-      #saveBtn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+      .task-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
       }
 
-      .pendingBox {
-        border-left: 4px solid #f5c451;
+      .task-actions button {
+        flex: 1;
+        padding: 8px 12px;
+        font-size: 0.85rem;
+        border-radius: 10px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: 0.2s ease;
+      }
+
+      .btn-edit {
+        background: #3085d6;
+        color: white;
+      }
+
+      .btn-edit:hover {
+        background: #2563bb;
+      }
+
+      .btn-delete {
+        background: #dc3545;
+        color: white;
+      }
+
+      .btn-delete:hover {
+        background: #c82333;
+      }
+
+      .btn-update {
+        background: #28a745;
+        color: white;
+      }
+
+      .btn-update:hover {
+        background: #218838;
+      }
+
+      .footer-actions {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(180deg, transparent 0%, rgba(15, 15, 15, 0.98) 50%);
+        padding: 20px 16px 16px;
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        z-index: 100;
+      }
+
+      .footer-actions button {
+        padding: 12px 24px;
+        border-radius: 12px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 0.9rem;
+      }
+
+      .btn-primary-jef {
+        background: linear-gradient(135deg, #f5c451, #d8a52c);
+        color: #111;
+        flex: 1;
+        max-width: 200px;
+      }
+
+      .btn-primary-jef:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(245, 196, 81, 0.3);
+      }
+
+      .btn-secondary-jef {
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(245, 196, 81, 0.3);
+        color: #f5c451;
+      }
+
+      .btn-secondary-jef:hover {
+        background: rgba(245, 196, 81, 0.1);
+      }
+
+      .refresh-btn {
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        color: white;
+      }
+
+      .refresh-btn:hover {
+        background: rgba(255, 255, 255, 0.12);
       }
     </style>
   </head>
   <body>
-    <div class="container" style="max-width: 900px">
-      <div class="cardx">
-        <div class="profile">
-          <div class="avatar">
+    <div class="dashboard-container">
+      <!-- Header dengan Profile -->
+      <div class="bento-card mb-4">
+        <div class="dashboard-header">
+          <div class="dashboard-avatar">
             <i class="bi bi-person"></i>
           </div>
-
-          <div>
+          <div class="dashboard-info">
             <h4 id="name">User</h4>
-            <div id="position">Jabatan :-</div>
-            <div id="division">Divisi :-</div>
+            <small id="position">Jabatan: -</small>
+            <small id="division">Divisi: -</small>
           </div>
         </div>
       </div>
 
-      <div class="cardx">
-        <div class="row g-2">
-          <div class="col-md-4">
-            <input type="date" id="filterDate" class="form-control" />
-          </div>
-
-          <div class="col-md-4">
-            <select id="filterStatus" class="form-select">
-              <option value="">Semua Status</option>
-              <option value="DONE">DONE</option>
-              <option value="PENDING">PENDING</option>
-            </select>
-          </div>
-
-          <div class="col-md-4">
-            <button class="btn btn-jef w-100" onclick="loadDashboardTasks()">
-              <i class="bi bi-funnel"></i>
-              Filter
-            </button>
-          </div>
+      <!-- Filter Section -->
+      <div class="bento-card mb-4 p-4">
+        <h6 class="fw-bold mb-3 text-uppercase" style="font-size: 0.85rem; letter-spacing: 0.5px;">
+          Filter Task
+        </h6>
+        <div class="filter-section">
+          <input type="date" id="filterDate" class="form-control" />
+          <select id="filterStatus" class="form-select">
+            <option value="">Semua Status</option>
+            <option value="DONE">DONE</option>
+            <option value="PENDING">PENDING</option>
+          </select>
+          <button class="btn filter-btn w-100" onclick="loadDashboardTasks()">
+            <i class="bi bi-funnel me-2"></i> Filter
+          </button>
         </div>
       </div>
 
+      <!-- Stats -->
       <div id="stats"></div>
 
+      <!-- Task List -->
       <div id="taskContainer"></div>
-
     </div>
+
+    <!-- Footer Actions -->
+    <div class="footer-actions">
+      <button class="btn refresh-btn" onclick="loadDashboardTasks()">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+      </button>
+      <button class="btn btn-primary-jef" onclick="saveAllChanges()">
+        Simpan <span id="pendingCount">0</span>
+      </button>
+      <button class="btn btn-secondary-jef" onclick="backToHome()">
+        <i class="bi bi-house-fill me-1"></i> Home
+      </button>
+    </div>
+
+    <script>
+      function backToHome() {
+        window.location.href = "./index.html";
+      }
+
+      window.addEventListener("DOMContentLoaded", () => {
+        const dateInput = document.getElementById("filterDate");
+        const today = new Date().toISOString().split("T")[0];
+        dateInput.value = today;
+
+        loadDashboardProfile();
+        loadDashboardTasks();
+      });
+
+      // Override renderDashboard untuk styling custom
+      const originalRenderDashboard = renderDashboard;
+      window.renderDashboard = function () {
+        let tasks = [...dashboardTasks];
+        const status = document.getElementById("filterStatus").value;
+
+        if (status) {
+          tasks = tasks.filter((x) => x.status === status);
+        }
+
+        let done = tasks.filter((x) => x.status === "DONE").length;
+        let pending = tasks.filter((x) => x.status !== "DONE").length;
+
+        document.getElementById("stats").innerHTML = `
+          <div class="stats-grid mb-4">
+            <div class="stat-card">
+              <small>Total</small>
+              <h5>${tasks.length}</h5>
+              <small>📋</small>
+            </div>
+            <div class="stat-card">
+              <small>Done</small>
+              <h5>${done}</h5>
+              <small>✅</small>
+            </div>
+            <div class="stat-card">
+              <small>Pending</small>
+              <h5>${pending}</h5>
+              <small>⌛</small>
+            </div>
+          </div>
+        `;
+
+        let html = "";
+        tasks.forEach((t) => {
+          html += `
+            <div class="task-card" data-row="${t.row}">
+              <div class="task-header">
+                <div>
+                  <div class="task-title">${t.task}</div>
+                  <div class="task-target">Target: ${t.target}</div>
+                </div>
+                <span class="badge-${t.status === "DONE" ? "done" : "pending"}">
+                  ${t.status}
+                </span>
+              </div>
+
+              <div class="task-inputs">
+                <div>
+                  <label class="small fw-semibold mb-1 d-block text-muted">Jam Mulai</label>
+                  <input type="time" class="form-control start" min="00:00" max="23:59" value="${t.startTime || ""}" />
+                </div>
+
+                <div>
+                  <label class="small fw-semibold mb-1 d-block text-muted">Jam Selesai</label>
+                  <input type="time" class="form-control end" min="00:00" max="23:59" value="${t.endTime || ""}" />
+                </div>
+
+                <div>
+                  <label class="small fw-semibold mb-1 d-block text-muted">Output Hasil</label>
+                  <input type="text" class="form-control output" placeholder="Hasil kerja..." value="${t.output || ""}" />
+                </div>
+
+                <div>
+                  <label class="small fw-semibold mb-1 d-block text-muted">Kendala (Opsional)</label>
+                  <input type="text" class="form-control issue" placeholder="Ada hambatan?" value="${t.issue || ""}" />
+                </div>
+              </div>
+
+              <div class="task-actions">
+                <button class="btn-edit" onclick="editTask(${t.row})">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn-delete" onclick="deleteTask(${t.row})">
+                  <i class="bi bi-trash"></i> Hapus
+                </button>
+                <button class="btn-update" onclick="saveDetail(${t.row}, this)">
+                  <i class="bi bi-check"></i> Update
+                </button>
+              </div>
+            </div>
+          `;
+        });
+
+        document.getElementById("taskContainer").innerHTML = html;
+        document.getElementById("pendingCount").textContent = `(${totalPending()})`;
+      };
+    </script>
   </body>
 </html>
+
