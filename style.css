@@ -308,7 +308,7 @@
         align-items: center;
         gap: 5px;
 
-        padding: 4px 15px;
+        padding: 4px 10px;
         border-radius: 16px;
 
         background: rgba(31, 31, 31, 0.85);
@@ -331,7 +331,7 @@
       }
 
       .time-box i {
-        font-size: 18px;
+        font-size: 14px;
       }
 
       .time-box .form-control {
@@ -685,12 +685,17 @@
         opacity: 0.85;
       }
 
+      
+
       @media (max-width: 480px) {
         .bento-card {
           padding: 18px;
-          border-radius: 18px;
           width: 340px;
         }
+
+        .swal2-container {
+    padding: 20px;
+}
 
         .bento-header {
           padding: 25px 18px;
@@ -712,6 +717,6 @@
 
         input,
         .form-control {
-          font-size: 14px;
+          font-size: 14px!important;
         }
       }
