@@ -315,7 +315,13 @@ async function loadDashboardTasks() {
 
         Swal.close();
 
-        renderDashboard();
+        pendingChanges={
+             create:[],
+             update:[],
+             delete:[]
+         };
+         
+         renderDashboard();
 
     } catch(e){
 
@@ -328,12 +334,11 @@ async function loadDashboardTasks() {
 
 function saveDetail(row,btn){
 
-    let card=
-    btn.closest(".taskCard");
+    let card = btn.closest(".taskCard");
 
     const data={
 
-        row,
+        row:row,
 
         startTime:
         card.querySelector(".start").value,
@@ -349,6 +354,22 @@ function saveDetail(row,btn){
 
     };
 
+    // update state dashboard lokal
+    let task=
+    dashboardTasks.find(
+        x=>x.row==row
+    );
+
+    if(task){
+
+        Object.assign(
+            task,
+            data
+        );
+
+    }
+
+    // update pending
     const exist=
     pendingChanges.update.find(
         x=>x.row==row
@@ -369,14 +390,14 @@ function saveDetail(row,btn){
 
     }
 
+    renderDashboard();
+
     Swal.fire({
         icon:"success",
-        title:"Disimpan sementara",
+        title:"Perubahan disimpan sementara",
         timer:1000,
         showConfirmButton:false
     });
-
-    renderDashboard();
 
 }
 
@@ -387,21 +408,27 @@ async function editTask(row){
         x=>x.row==row
     );
 
+    if(!task)return;
+
     const p=
     await Swal.fire({
 
         title:"Edit Task",
 
         html:`
-        <input id=t1
-        value="${task.task}"
-        class="form-control">
+
+        <input
+        id="t1"
+        class="form-control"
+        value="${task.task}">
 
         <br>
 
-        <input id=t2
-        value="${task.target}"
-        class="form-control">
+        <input
+        id="t2"
+        class="form-control"
+        value="${task.target}">
+
         `,
 
         showCancelButton:true,
@@ -409,10 +436,14 @@ async function editTask(row){
         preConfirm:()=>({
 
             task:
-            document.getElementById("t1").value,
+            document.getElementById(
+                "t1"
+            ).value,
 
             target:
-            document.getElementById("t2").value
+            document.getElementById(
+                "t2"
+            ).value
 
         })
 
@@ -420,16 +451,40 @@ async function editTask(row){
 
     if(!p.value)return;
 
-    task.task=p.value.task;
-    task.target=p.value.target;
+    // update lokal
+    task.task=
+    p.value.task;
 
-    pendingChanges.update.push({
+    task.target=
+    p.value.target;
+
+    const updateData={
 
         row:row,
         task:task.task,
         target:task.target
 
-    });
+    };
+
+    const exist=
+    pendingChanges.update.find(
+        x=>x.row==row
+    );
+
+    if(exist){
+
+        Object.assign(
+            exist,
+            updateData
+        );
+
+    }else{
+
+        pendingChanges.update.push(
+            updateData
+        );
+
+    }
 
     renderDashboard();
 
@@ -440,14 +495,37 @@ async function editTask(row){
 ========================================= */
 async function deleteTask(row){
 
+    const confirm=
+    await Swal.fire({
+
+        title:"Hapus Task?",
+
+        icon:"warning",
+
+        showCancelButton:true
+
+    });
+
+    if(!confirm.isConfirmed)
+    return;
+
     dashboardTasks=
     dashboardTasks.filter(
         x=>x.row!=row
     );
 
-    pendingChanges.delete.push(
-        row
-    );
+    // cegah duplikat
+    if(
+        !pendingChanges.delete.includes(
+            row
+        )
+    ){
+
+        pendingChanges.delete.push(
+            row
+        );
+
+    }
 
     renderDashboard();
 
