@@ -85,18 +85,38 @@ function updateDateTime() {
     if (clockEl) clockEl.innerText = currentTime;
 }
 
+// function initTimePicker() {
+//     document.querySelectorAll(".timepicker").forEach((el) => {
+//         if (el._flatpickr) return;
+//         flatpickr(el, {
+//             enableTime: true,
+//             noCalendar: true,
+//             dateFormat: "H:i",
+//             time_24hr: true,
+//             minuteIncrement: 5,
+//             disableMobile: true,
+//         });
+//     });
+// }
+
 function initTimePicker() {
-    document.querySelectorAll(".timepicker").forEach((el) => {
-        if (el._flatpickr) return;
-        flatpickr(el, {
-            enableTime: true,
-            noCalendar: true,
-            dateFormat: "H:i",
-            time_24hr: true,
-            minuteIncrement: 5,
-            disableMobile: true,
+
+    document.querySelectorAll(".timepicker").forEach((el)=>{
+
+        if(el.dataset.init) return;
+
+        el.dataset.init = "true";
+
+        mdtimepicker(el,{
+            theme:"blue",
+            format:"hh:mm",   // tampil 01:00
+            hourPadding:true,
+            clearBtn:false,
+            is24hour:true
         });
+
     });
+
 }
 
 /* =========================================
@@ -292,14 +312,20 @@ async function showReport() {
                             <label class="form-label small text-uppercase fw-bold text-muted">Mulai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-play"></i></span>
-                                <input type="text" class="form-control bg-dark text-white border-secondary timepicker r-start" placeholder="00:00">
+                                <input
+type="text"
+class="form-control bg-dark text-white border-secondary timepicker r-start"
+placeholder="00:00">
                             </div>
                         </div>
                         <div class="col-6">
                             <label class="form-label small text-uppercase fw-bold text-muted">Selesai</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-stop"></i></span>
-                                <input type="text" class="form-control bg-dark text-white border-secondary timepicker r-end" placeholder="00:00">
+                                <input
+type="text"
+class="form-control bg-dark text-white border-secondary timepicker r-end"
+placeholder="00:00">
                             </div>
                         </div>
                         
