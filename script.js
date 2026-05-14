@@ -6,6 +6,20 @@ const WEB_APP_URL = "https://script.google.com/macros/s/AKfycby8gdFUTmrgBnmgUqFi
 let user = localStorage.getItem("jef_user_logged") || "";
 let deferredPrompt = null;
 
+
+/* =========================================
+   DASHBOARD LOCAL STATE
+========================================= */
+
+let dashboardTasks = [];
+
+let pendingChanges = {
+    create: [],
+    update: [],
+    delete: []
+};
+
+
 /* =========================================
    HELPER API (SHARED)
 ========================================= */
@@ -284,129 +298,159 @@ async function loadDashboardProfile() {
 }
 
 async function loadDashboardTasks() {
+
     const dashUser = localStorage.getItem("jef_dashboard_user");
     const filterDate = document.getElementById("filterDate");
     const filterStatus = document.getElementById("filterStatus");
-    
+
     loader("Loading Dashboard...");
+
     try {
-        let tasks = await callAPI({
+
+        dashboardTasks = await callAPI({
             action: "getDashboardTasks",
             username: dashUser,
-            date: filterDate.value,
+            date: filterDate.value
         });
+
         Swal.close();
 
-        let status = filterStatus.value;
-        if (status) tasks = tasks.filter((x) => x.status == status);
+        renderDashboard();
 
-        let done = tasks.filter((x) => x.status == "DONE").length;
-        let pending = tasks.filter((x) => x.status != "DONE").length;
+    } catch(e){
 
-        document.getElementById("stats").innerHTML = `
-            <div class='cardx'><div class='row text-center'>
-            <div class='col'>📋<h4>${tasks.length}</h4>Total</div>
-            <div class='col'>✅<h4>${done}</h4>Done</div>
-            <div class='col'>⌛<h4>${pending}</h4>Pending</div>
-            </div></div>`;
+        Swal.close();
+        console.log(e);
 
-        let html = "";
-        for (let t of tasks) {
-            html += `<div class='taskCard'>
-                <div class='d-flex justify-content-between'>
-                <div><h5>${t.task}</h5><small>${t.target}</small></div>
-                <span class='badge ${t.status == "DONE" ? "badgeDone" : "badgePending"}'>${t.status}</span>
-                </div>
-                <div class='row mt-3'>
-                <div class='col-md-6'><input class='form-control start' placeholder='Jam Mulai'></div>
-                <div class='col-md-6'><input class='form-control end' placeholder='Jam Selesai'></div>
-                <div class='col-md-6 mt-2'><input class='form-control output' placeholder='Output'></div>
-                <div class='col-md-6 mt-2'><input class='form-control issue' placeholder='Kendala'></div>
-                </div>
-                <div class='mt-3 d-flex gap-2'>
-                <button class='btn btn-warning btn-sm' onclick='editTask(${t.row},"${t.task}","${t.target}")'><i class='bi bi-pencil'></i></button>
-                <button class='btn btn-danger btn-sm' onclick='deleteTask(${t.row})'><i class='bi bi-trash'></i></button>
-                <button class='btn btn-success btn-sm' onclick='saveDetail(${t.row},this)'><i class='bi bi-floppy'></i> Simpan</button>
-                </div></div>`;
-        }
-        document.getElementById("taskContainer").innerHTML = html;
-    } catch(e) { Swal.close(); }
+    }
+
 }
 
-async function saveDetail(row, btn) {
-    let card = btn.closest(".taskCard");
-    await callAPI({
-        action: "updateDashboardTask",
-        data: {
-            row: row,
-            startTime: card.querySelector(".start").value,
-            endTime: card.querySelector(".end").value,
-            output: card.querySelector(".output").value,
-            issue: card.querySelector(".issue").value,
-        },
+function saveDetail(row,btn){
+
+    let card=
+    btn.closest(".taskCard");
+
+    const data={
+
+        row,
+
+        startTime:
+        card.querySelector(".start").value,
+
+        endTime:
+        card.querySelector(".end").value,
+
+        output:
+        card.querySelector(".output").value,
+
+        issue:
+        card.querySelector(".issue").value
+
+    };
+
+    const exist=
+    pendingChanges.update.find(
+        x=>x.row==row
+    );
+
+    if(exist){
+
+        Object.assign(
+            exist,
+            data
+        );
+
+    }else{
+
+        pendingChanges.update.push(
+            data
+        );
+
+    }
+
+    Swal.fire({
+        icon:"success",
+        title:"Disimpan sementara",
+        timer:1000,
+        showConfirmButton:false
     });
-    Swal.fire("Berhasil", "Task diperbarui", "success");
+
+    renderDashboard();
+
 }
 
-async function editTask(row, task, target) {
-    const p = await Swal.fire({
-        title: "Edit Task",
-        html: `<input id=t1 value='${task}' class='form-control'><br><input id=t2 value='${target}' class='form-control'>`,
-        showCancelButton: true,
-        preConfirm: () => ({ task: document.getElementById('t1').value, target: document.getElementById('t2').value }),
+async function editTask(row){
+
+    let task=
+    dashboardTasks.find(
+        x=>x.row==row
+    );
+
+    const p=
+    await Swal.fire({
+
+        title:"Edit Task",
+
+        html:`
+        <input id=t1
+        value="${task.task}"
+        class="form-control">
+
+        <br>
+
+        <input id=t2
+        value="${task.target}"
+        class="form-control">
+        `,
+
+        showCancelButton:true,
+
+        preConfirm:()=>({
+
+            task:
+            document.getElementById("t1").value,
+
+            target:
+            document.getElementById("t2").value
+
+        })
+
     });
-    if (!p.value) return;
-    await callAPI({
-        action: "updateTask",
-        data: { row: row, task: p.value.task, target: p.value.target },
+
+    if(!p.value)return;
+
+    task.task=p.value.task;
+    task.target=p.value.target;
+
+    pendingChanges.update.push({
+
+        row:row,
+        task:task.task,
+        target:task.target
+
     });
-    loadDashboardTasks();
+
+    renderDashboard();
+
 }
 
 /* =========================================
    DELETE TASK LOGIC (DASHBOARD)
 ========================================= */
-async function deleteTask(row) {
-    // Memberikan peringatan sebelum menghapus
-    const confirm = await Swal.fire({
-        title: "Hapus Tugas?",
-        text: "Data yang dihapus tidak dapat dikembalikan!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#6c757d",
-        confirmButtonText: "Ya, Hapus!",
-        cancelButtonText: "Batal"
-    });
+async function deleteTask(row){
 
-    if (confirm.isConfirmed) {
-        loader("Menghapus data...");
-        try {
-            const res = await callAPI({ 
-                action: "deleteTask", 
-                row: row 
-            });
-           
+    dashboardTasks=
+    dashboardTasks.filter(
+        x=>x.row!=row
+    );
 
-            if (res && res.success) {
-                Swal.fire({
-                    title: "Terhapus!",
-                    text: "Tugas berhasil dihapus.",
-                    icon: "success",
-                    timer: 1500,
-                    showConfirmButton: false
-                });
-                // Refresh daftar tugas setelah menghapus
-                loadDashboardTasks(); 
-            } else {
-                Swal.fire("Gagal", "Gagal menghapus data dari database.", "error");
-            }
-        } catch (err) {
-            Swal.close();
-            console.error("Delete Error:", err);
-            Swal.fire("Error", "Gagal terhubung ke server.", "error");
-        }
-    }
+    pendingChanges.delete.push(
+        row
+    );
+
+    renderDashboard();
+
 }
 
 /* =========================================
@@ -504,4 +548,212 @@ async function executePwaInstall() {
 function closePwaModal() {
     const modal = document.getElementById("pwaInstallModal");
     if (modal) modal.style.display = "none";
+}
+
+
+function renderDashboard(){
+
+    let tasks=[...dashboardTasks];
+
+    const status=
+    document.getElementById("filterStatus").value;
+
+    if(status){
+        tasks=tasks.filter(
+            x=>x.status===status
+        );
+    }
+
+    let done=
+    tasks.filter(
+        x=>x.status==="DONE"
+    ).length;
+
+    let pending=
+    tasks.filter(
+        x=>x.status!=="DONE"
+    ).length;
+
+    document.getElementById("stats").innerHTML=`
+    <div class='cardx'>
+        <div class='row text-center'>
+
+        <div class='col'>
+        📋<h4>${tasks.length}</h4>Total
+        </div>
+
+        <div class='col'>
+        ✅<h4>${done}</h4>Done
+        </div>
+
+        <div class='col'>
+        ⌛<h4>${pending}</h4>Pending
+        </div>
+
+        </div>
+    </div>`;
+
+    let html="";
+
+    tasks.forEach((t)=>{
+
+        html+=`
+
+        <div class='taskCard' data-row='${t.row}'>
+
+        <div class='d-flex justify-content-between'>
+
+        <div>
+        <h5>${t.task}</h5>
+        <small>${t.target}</small>
+        </div>
+
+        <span class='badge ${t.status=="DONE"?"badgeDone":"badgePending"}'>
+        ${t.status}
+        </span>
+
+        </div>
+
+        <div class='row mt-3'>
+
+        <div class='col-md-6'>
+        <input class='form-control start'
+        value='${t.startTime||""}'>
+        </div>
+
+        <div class='col-md-6'>
+        <input class='form-control end'
+        value='${t.endTime||""}'>
+        </div>
+
+        <div class='col-md-6 mt-2'>
+        <input class='form-control output'
+        value='${t.output||""}'>
+        </div>
+
+        <div class='col-md-6 mt-2'>
+        <input class='form-control issue'
+        value='${t.issue||""}'>
+        </div>
+
+        </div>
+
+        <div class='mt-3 d-flex gap-2'>
+
+        <button class='btn btn-warning btn-sm'
+        onclick='editTask(${t.row})'>
+        <i class='bi bi-pencil'></i>
+        </button>
+
+        <button class='btn btn-danger btn-sm'
+        onclick='deleteTask(${t.row})'>
+        <i class='bi bi-trash'></i>
+        </button>
+
+        <button class='btn btn-info btn-sm'
+        onclick='saveDetail(${t.row},this)'>
+        Update
+        </button>
+
+        </div>
+
+        </div>
+        `;
+
+    });
+
+    html+=`
+
+    <div class='mt-4 text-center'>
+
+    <button
+    class='btn btn-success'
+    onclick='saveAllChanges()'>
+
+    Simpan Semua
+    (${totalPending()})
+
+    </button>
+
+    </div>
+
+    `;
+
+    document.getElementById(
+    "taskContainer"
+    ).innerHTML=html;
+
+}
+
+function totalPending(){
+
+    return (
+        pendingChanges.create.length+
+        pendingChanges.update.length+
+        pendingChanges.delete.length
+    );
+
+}
+
+async function saveAllChanges(){
+
+    if(
+        totalPending()==0
+    ){
+
+        return Swal.fire(
+            "Info",
+            "Tidak ada perubahan",
+            "info"
+        );
+
+    }
+
+    loader(
+        "Menyimpan..."
+    );
+
+    try{
+
+        const res=
+        await callAPI({
+
+            action:
+            "batchUpdate",
+
+            payload:
+            pendingChanges
+
+        });
+
+        Swal.close();
+
+        pendingChanges={
+
+            create:[],
+            update:[],
+            delete:[]
+
+        };
+
+        Swal.fire(
+            "Berhasil",
+            "Semua perubahan tersimpan",
+            "success"
+        );
+
+        loadDashboardTasks();
+
+    }catch(e){
+
+        Swal.close();
+
+        Swal.fire(
+            "Error",
+            e.toString(),
+            "error"
+        );
+
+    }
+
 }
