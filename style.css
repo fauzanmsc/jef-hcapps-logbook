@@ -110,7 +110,7 @@
       }
 
       i.bi {
-        font-size: 18px;
+        font-size: 14px;
       }
 
       .form-check .form-check-input {
@@ -425,6 +425,7 @@
         border-color: var(--gold);
         transform: translateY(-5px);
         box-shadow: 0 12px 30px rgba(245, 196, 81, 0.18);
+        background: linear-gradient(149deg, #fffdf7, #ffd87d);
       }
 
       .modern-check {
@@ -488,7 +489,7 @@
       }
 
       .form-control:focus {
-          background-color: #2a2a3d !important;
+          background-color: rgb(52 52 52) !important;
           border-color: #f5c451 !important;
           box-shadow: none;
           color: white !important;

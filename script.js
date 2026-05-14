@@ -259,9 +259,8 @@ async function showReport() {
 
         // Header Dashboard Sederhana
         let h = `
-            <div class="dashboard-header mb-4 px-2">
-                <h4 class="fw-bold mb-1 text-white">Laporan Harian</h4>
-                <p class="text-muted small">Ditemukan ${tasks.length} tugas yang perlu dilaporkan.</p>
+            <div class="dashboard-header mb-4 px-2 text-center">
+                <h6 class="text-muted ">Ada ${tasks.length} tugas yang perlu dilaporkan.</h6>
             </div>
         `;
 
@@ -269,20 +268,20 @@ async function showReport() {
             if (!t.row) return;
             h += `
             <div class="report-card mb-4 overflow-hidden shadow-sm" data-row="${t.row}" 
-                 style="background: #1e1e2e; border-radius: 20px; border: 1px solid #333;">
+                 style="background: #141516;; border-radius: 20px; border: 1px solid #333;">
                 
                 <!-- Card Header -->
                 <div class="p-3 d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.03);">
                     <span class="badge rounded-pill px-3 py-2" style="background: #f5c451; color: #000;">Tugas #${i + 1}</span>
-                    <i class="bi bi-clock-history text-muted"></i>
+                    <i class="bi bi-clipboard-check text-muted"></i>
                 </div>
 
                 <div class="p-4">
                     <!-- Task Info -->
-                    <div class="task-info mb-4">
+                    <div class="task-info mb-3">
                         <h6 class="text-white fw-bold mb-1">${t.task}</h6>
                         <div class="d-flex align-items-center text-muted">
-                            <i class="bi bi-geo-alt-fill me-1 small"></i>
+                            <i class="bi bi-bullseye me-1 small"></i>
                             <span style="font-size: 0.85rem;">Target: ${t.target}</span>
                         </div>
                     </div>
@@ -316,8 +315,8 @@ async function showReport() {
 
                         <!-- Completion Status -->
                         <div class="col-12 mt-3">
-                            <div class="completion-toggle p-3 rounded-3 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.05);">
-                                <label class="form-check-label text-white fw-medium m-0">Tandai Sudah Selesai</label>
+                            <div class="completion-toggle p-3 rounded-4 d-flex align-items-center justify-content-between" style="background: rgba(255,255,255,0.05);">
+                                <label class="form-check-label text-white fw-medium m-0">Selesai / Achive Target ?</label>
                                 <div class="form-check form-switch m-0">
                                     <input class="form-check-input r-c" type="checkbox" style="width: 2.5em; height: 1.25em; cursor: pointer;">
                                 </div>
