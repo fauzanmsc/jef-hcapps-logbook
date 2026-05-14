@@ -809,6 +809,16 @@ select:-webkit-autofill {
           <span class="small fw-bold text-dark">Selesaikan LogBook</span>
         </div>
       </div>
+
+      <div class="col-6">
+        <div class="menu-item shadow-sm" onclick="openDashboard()">
+          <span class="menu-icon">📊</span>
+          <span class="small fw-bold text-dark">
+            Dashboard Task
+          </span>
+        </div>
+      </div>
+      
     </div>
     <div class="text-center mt-5">
      
@@ -1763,6 +1773,20 @@ window.addEventListener("appinstalled", () => {
 
   closePwaModal();
 });
+
+
+  function openDashboard(){
+
+    localStorage.setItem(
+    "jef_dashboard_user",
+    user
+    );
+    
+    window.location.href =
+    "./dashboard.html";
+    
+    }
+      
 </script>
 
   <!-- Custom Modal PWA Install -->
