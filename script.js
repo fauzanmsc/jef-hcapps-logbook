@@ -742,7 +742,15 @@ function renderDashboard(){
 
     html+=`
 
-    <div class='mt-4 text-center'>
+    <div class='mt-4 text-center gap-2'>
+
+    <button
+class="btn btn-outline-light"
+onclick="loadDashboardTasks()">
+<i class="bi bi-arrow-clockwise"></i>
+Refresh
+</button>
+
 
     <button
     class='btn btn-success'
