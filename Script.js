@@ -1,347 +1,646 @@
 /* =========================================
-   CONFIG & GLOBAL VARIABLES
+   CONFIG
 ========================================= */
-const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbpJQas3xphkwdMC-JF_vBmmkSzo24QH3UefteN1HAr7Up0mwNjON1QW5gUZNDNjlJVw/exec";
-let user = localStorage.getItem("jef_user_logged") || "";
-let deferredPrompt = null;
+      const WEB_APP_URL =
+        "https://script.google.com/macros/s/AKfycbxDv3hzc5yiezxNOg9v2ilvHpvL-z4xZyclvX4zXAP_F0ynmEmTqAKIa8h4bUBwwqvD/exec"; ////UBAH URL
 
-/* =========================================
-   HELPER & SHARED FUNCTIONS
+      let user = "";
+      let deferredPrompt = null;
+
+      /* =========================================
+   HELPER API
 ========================================= */
-async function callAPI(payload) {
-    try {
+      /* =========================================
+   HELPER API
+========================================= */
+      async function callAPI(payload) {
         const response = await fetch(WEB_APP_URL, {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: "data=" + encodeURIComponent(JSON.stringify(payload)),
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: "data=" + encodeURIComponent(JSON.stringify(payload)),
         });
+
         return await response.json();
-    } catch (err) {
-        console.error("API Error:", err);
-        Swal.fire("System Error", "Gagal terhubung ke server.", "error");
-    }
-}
+      }
 
-function loader(text = "Loading...") {
-    Swal.fire({
-        title: text,
-        allowOutsideClick: false,
-        didOpen: () => Swal.showLoading(),
-    });
-}
-
-function nav(id) {
-    document.querySelectorAll(".page").forEach((p) => {
-        p.classList.remove("active");
-        p.style.display = "none";
-    });
-    const active = document.getElementById(id);
-    if (active) {
-        active.classList.add("active");
-        active.style.display = "flex";
-    }
-}
-
-/* =========================================
-   AUTH & SESSION (INDEX.HTML)
+      /* =========================================
+   NAVIGATION
 ========================================= */
-async function doLogin() {
-    const u = document.getElementById("u").value.trim();
-    const p = document.getElementById("p").value.trim();
-
-    if (!u || !p) {
-        return Swal.fire("Oops!", "Lengkapi kredensial login terlebih dahulu.", "warning");
-    }
-
-    loader("Proses Autentifikasi...");
-    const res = await callAPI({ action: "checkLogin", u, p });
-    Swal.close();
-
-    if (res && res.success) {
-        user = res.username;
-        localStorage.setItem("jef_user_logged", res.username);
-        localStorage.setItem("jef_user_name", res.name);
-        
-        if(document.getElementById("userLabel")) {
-            document.getElementById("userLabel").innerText = res.name;
-        }
-
-        Swal.fire({
-            title: "Login Berhasil",
-            text: "Selamat datang, " + res.name,
-            icon: "success",
-            timer: 1500,
-            showConfirmButton: false,
+      function nav(id) {
+        document.querySelectorAll(".page").forEach((p) => {
+          p.classList.remove("active");
+          p.style.display = "none";
         });
-        nav("pageMenu");
-    } else {
-        Swal.fire("Login Gagal", "Username atau Password salah.", "error");
-    }
-}
 
-function confirmExit() {
-    Swal.fire({
-        title: "Keluar dari aplikasi?",
-        text: "Kamu harus login kembali nanti.",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#f5c451",
-        confirmButtonText: "Ya, keluar",
-    }).then((result) => {
-        if (result.isConfirmed) {
-            localStorage.removeItem("jef_user_logged");
-            localStorage.removeItem("jef_user_name");
-            location.reload();
+        const active = document.getElementById(id);
+
+        if (active) {
+          active.classList.add("active");
+          active.style.display = "flex";
         }
-    });
-}
+      }
 
-/* =========================================
-   PLAN & TASK MANAGEMENT (INDEX.HTML)
+      /* =========================================
+   LOADER
 ========================================= */
-async function showPlan() {
-    loader("Memuat logbook...");
-    const p = await callAPI({ action: "getUserProfile", username: user });
-    Swal.close();
+      function loader(text = "Loading...") {
+        Swal.fire({
+          title: text,
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading(),
+        });
+      }
 
-    if (document.getElementById("disName")) {
-        document.getElementById("disName").value = user;
-        document.getElementById("disPos").value = p.position || "-";
-        document.getElementById("disDiv").value = p.division || "-";
-        document.getElementById("clockIn").value = new Date().toTimeString().slice(0, 5);
-        nav("pagePlan");
-        initTimePicker();
-    }
-}
+      /* =========================================
+   LOGIN
+========================================= */
+      async function doLogin() {
+        const u = document.getElementById("u").value.trim();
+        const p = document.getElementById("p").value.trim();
 
-function addPlanField() {
-    const html = `
-    <div class="row g-2 mb-2 task-row">
-      <div class="col-5"><input type="text" class="form-control tn shadow-sm" placeholder="Isi task"></div>
-      <div class="col-5"><input type="text" class="form-control tt shadow-sm" placeholder="Isi target"></div>
-      <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100 h-100" onclick="removeTask(this)"><i class="bi bi-trash3-fill"></i></button></div>
-    </div>`;
-    document.getElementById("planContainer").insertAdjacentHTML("beforeend", html);
-}
+        if (!u || !p) {
+          return Swal.fire(
+            "Oops!",
+            "Lengkapi kredensial login terlebih dahulu.",
+            "warning",
+          );
+        }
 
-function removeTask(button) {
-    if (document.querySelectorAll(".task-row").length <= 1) {
-        return Swal.fire("Oops!", "Minimal harus ada 1 task.", "warning");
-    }
-    button.closest(".task-row").remove();
-}
+        try {
+          loader("Proses Autentifikasi...");
 
-async function submitPlan() {
-    let tasks = [];
-    document.querySelectorAll(".tn").forEach((el, i) => {
-        if (el.value.trim()) {
-            tasks.push({
-                name: el.value.trim(),
-                target: document.querySelectorAll(".tt")[i].value.trim(),
+          const res = await callAPI({
+            action: "checkLogin",
+            u,
+            p,
+          });
+
+          Swal.close();
+
+          if (res.success) {
+            // Simpan session user
+            user = res.username;
+
+            // Simpan local storage
+            localStorage.setItem("jef_user_logged", res.username);
+
+            localStorage.setItem("jef_user_name", res.name);
+
+            // Update nama user di dashboard
+            document.getElementById("userLabel").innerText = res.name;
+
+            // Alert sukses
+            Swal.fire({
+              title: "Login Berhasil",
+              text: "Selamat datang, " + res.name,
+              icon: "success",
+              timer: 1500,
+              showConfirmButton: false,
             });
+
+            // Pindah halaman
+            nav("pageMenu");
+          } else {
+            Swal.fire("Login Gagal", "Username atau Password salah.", "error");
+
+            return;
+          }
+        } catch (err) {
+          Swal.close();
+
+          console.error(err);
+
+          Swal.fire("System Error", "Gagal terhubung ke server.", "error");
         }
-    });
+      }
 
-    if (tasks.length === 0) return Swal.fire("Oops!", "Setidaknya harus ada 1 tugas.", "warning");
-
-    loader("Sedang menyimpan task...");
-    const data = {
-        name: user,
-        position: document.getElementById("disPos").value,
-        division: document.getElementById("disDiv").value,
-        clockIn: document.getElementById("clockIn").value,
-        date: new Date().toLocaleDateString("sv-SE"),
-        tasks: JSON.stringify(tasks),
-    };
-
-    const res = await callAPI({ action: "savePlan", data });
-    Swal.fire("Success", res.message, "success");
-    nav("pageMenu");
-}
-
-/* =========================================
-   REPORTING (INDEX.HTML)
+      /* =========================================
+   SHOW PLAN
 ========================================= */
-async function showReport() {
-    loader("Memeriksa tugas aktif...");
-    const tasks = await callAPI({ action: "getActiveTasks", username: user });
-    Swal.close();
+      async function showPlan() {
+        try {
+          loader("Memuat logbook...");
 
-    if (!tasks || tasks.length === 0) {
-        return Swal.fire("Tugas Tidak Ditemukan", "Tidak ada tugas aktif saat ini.", "info");
-    }
+          const p = await callAPI({
+            action: "getUserProfile",
+            username: user,
+          });
 
-    let h = "";
-    tasks.forEach((t, i) => {
-        if (!t.row) return;
-        h += `
-        <div class="bento-card mb-3 bg-light report-item" data-row="${t.row}" style="padding:18px;border-radius:16px;border-left:3px solid #f5c451;">
-            <div class="mb-2"><span class="badge bg-primary text-dark mb-1">TASK ${i + 1}</span><p class="mb-1 fw-bold text-white small">${t.task}</p><small class="text-muted d-block mb-3">Target: ${t.target}</small></div>
-            <div class="row g-2">
-                <div class="col-6"><label class="small fw-semibold mb-2">Mulai*</label><input type="text" class="form-control timepicker r-start" placeholder="00:00"></div>
-                <div class="col-6"><label class="small fw-semibold mb-2">Selesai*</label><input type="text" class="form-control timepicker r-end" placeholder="00:00"></div>
-                <div class="col-12 mt-2"><input type="text" class="form-control form-control-sm r-out" placeholder="Output Hasil (Wajib)*"></div>
-                <div class="col-12"><input type="text" class="form-control form-control-sm r-iss" placeholder="Kendala (Opsional)"></div>
-                <div class="col-12 mt-2"><div class="form-check modern-check"><input class="form-check-input r-c" type="checkbox"><label class="form-check-label text-white small">Ya, Selesai</label></div></div>
+          Swal.close();
+
+          document.getElementById("disName").value = user;
+          document.getElementById("disPos").value = p.position || "-";
+          document.getElementById("disDiv").value = p.division || "-";
+
+          document.getElementById("clockIn").value = new Date()
+            .toTimeString()
+            .slice(0, 5);
+
+          nav("pagePlan");
+
+          initTimePicker();
+        } catch (err) {
+          Swal.close();
+
+          console.error(err);
+
+          Swal.fire("Error", "Gagal memuat data profile.", "error");
+        }
+      }
+
+      /* =========================================
+   ADD PLAN FIELD
+========================================= */
+      function addPlanField() {
+        const html = `
+    <div class="row g-2 mb-2 task-row">
+
+      <div class="col-5">
+        <input
+          type="text"
+          class="form-control tn shadow-sm"
+          placeholder="Isi task / activity"
+        >
+      </div>
+
+      <div class="col-5">
+        <input
+          type="text"
+          class="form-control tt shadow-sm"
+          placeholder="Isi target dari task"
+        >
+      </div>
+
+      <div class="col-2">
+        <button
+          type="button"
+          class="btn btn-outline-secondary w-100 h-100"
+          onclick="removeTask(this)"
+        >
+          <i class="bi bi-trash3-fill"></i>
+        </button>
+      </div>
+
+    </div>
+  `;
+
+        document
+          .getElementById("planContainer")
+          .insertAdjacentHTML("beforeend", html);
+      }
+
+      /* =========================================
+   REMOVE TASK
+========================================= */
+      function removeTask(button) {
+        const totalTask = document.querySelectorAll(".task-row").length;
+
+        if (totalTask <= 1) {
+          Swal.fire("Oops!", "Minimal harus ada 1 task.", "warning");
+
+          return;
+        }
+
+        button.closest(".task-row").remove();
+      }
+
+      /* =========================================
+   SUBMIT PLAN
+========================================= */
+      async function submitPlan() {
+        let tasks = [];
+
+        document.querySelectorAll(".tn").forEach((el, i) => {
+          if (el.value.trim()) {
+            tasks.push({
+              name: el.value.trim(),
+              target: document.querySelectorAll(".tt")[i].value.trim(),
+            });
+          }
+        });
+
+        if (tasks.length === 0) {
+          return Swal.fire("Oops!", "Setidaknya harus ada 1 tugas.", "warning");
+        }
+
+        try {
+          loader("Sedang menyimpan task...");
+
+          const data = {
+            name: user,
+            position: document.getElementById("disPos").value,
+            division: document.getElementById("disDiv").value,
+            clockIn: document.getElementById("clockIn").value,
+            date: new Date().toLocaleDateString("sv-SE"),
+            tasks: JSON.stringify(tasks),
+          };
+
+          const res = await callAPI({
+            action: "savePlan",
+            data,
+          });
+
+          Swal.fire("Success", res.message, "success");
+
+          nav("pageMenu");
+        } catch (err) {
+          Swal.close();
+
+          console.error(err);
+
+          Swal.fire("Error", "Gagal menyimpan task.", "error");
+        }
+      }
+
+      /* =========================================
+   SHOW REPORT
+========================================= */
+      async function showReport() {
+        try {
+          loader("Memeriksa tugas aktif...");
+
+          const tasks = await callAPI({
+            action: "getActiveTasks",
+            username: user,
+          });
+
+          Swal.close();
+
+          if (!tasks || tasks.length === 0) {
+            return Swal.fire({
+              title: "Tugas Tidak Ditemukan",
+              text: "Tidak ada tugas aktif saat ini.",
+              icon: "info",
+            });
+          }
+
+          let h = "";
+
+          tasks.forEach((t, i) => {
+            if (!t.row) return;
+
+            h += `
+      <div class="bento-card mb-3 bg-light report-item"
+           data-row="${t.row}"
+           style="padding:18px;border-radius:16px;border-left:3px solid #f5c451;">
+
+        <div class="mb-2">
+          <span class="badge bg-primary text-dark mb-1">
+            TASK ${i + 1}
+          </span>
+
+          <p class="mb-1 fw-bold text-white small sentence-case">
+            ${t.task}
+          </p>
+
+          <small class="text-muted d-block mb-3 sentence-case">
+            Target: ${t.target}
+          </small>
+        </div>
+
+        <div class="row g-2">
+
+          <div class="col-6">
+            <label class="small fw-semibold mb-2">
+              Waktu Mulai*
+            </label>
+
+            <div class="time-box">
+              <input type="text"
+                     class="form-control timepicker r-start"
+                     placeholder="00:00">
             </div>
-        </div>`;
-    });
-    document.getElementById("reportContainer").innerHTML = h;
-    initTimePicker();
-    nav("pageReport");
-}
+          </div>
 
-async function finalReport() {
-    let reports = [];
-    let isAllValid = true;
-    const reportItems = document.querySelectorAll(".report-item");
+          <div class="col-6">
+            <label class="small fw-semibold mb-2">
+              Waktu Selesai*
+            </label>
 
-    reportItems.forEach((div) => {
-        const startTime = div.querySelector(".r-start").value;
-        const endTime = div.querySelector(".r-end").value;
-        const output = div.querySelector(".r-out").value;
-        const completed = div.querySelector(".r-c").checked;
+            <div class="time-box">
+              <input type="text"
+                     class="form-control timepicker r-end"
+                     placeholder="00:00">
+            </div>
+          </div>
 
-        if (!startTime || !endTime || !output || !completed) {
+          <div class="col-12 mt-2">
+            <input type="text"
+                   class="form-control form-control-sm r-out"
+                   placeholder="Output Hasil (Wajib)*">
+          </div>
+
+          <div class="col-12">
+            <input type="text"
+                   class="form-control form-control-sm r-iss"
+                   placeholder="Kendala/Issue (Opsional)">
+          </div>
+
+          <div class="col-12 mt-2">
+
+            <div class="form-check modern-check m-0">
+              <input class="form-check-input r-c"
+                     type="checkbox">
+
+              <label class="form-check-label text-white small">
+                Ya, Selesai
+              </label>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+      `;
+          });
+
+          document.getElementById("reportContainer").innerHTML = h;
+
+          initTimePicker();
+
+          nav("pageReport");
+        } catch (err) {
+          Swal.close();
+
+          console.error(err);
+
+          Swal.fire("System Error", err.toString(), "error");
+        }
+      }
+
+      /* =========================================
+   FINAL REPORT
+========================================= */
+      async function finalReport() {
+        let reports = [];
+        let isAllValid = true;
+
+        const reportItems = document.querySelectorAll(".report-item");
+
+        if (reportItems.length === 0) return;
+
+        reportItems.forEach((div) => {
+          const startTime = div.querySelector(".r-start").value;
+
+          const endTime = div.querySelector(".r-end").value;
+
+          const output = div.querySelector(".r-out").value;
+
+          const issue = div.querySelector(".r-iss").value;
+
+          const completed = div.querySelector(".r-c").checked;
+
+          if (!startTime || !endTime || !output || !completed) {
             isAllValid = false;
+
             div.style.border = "2px solid #ff4d4d";
-        } else {
+          } else {
             div.style.border = "none";
             div.style.borderLeft = "5px solid #f5c451";
+          }
+
+          reports.push({
+            row: div.dataset.row,
+            startTime,
+            endTime,
+            output,
+            issue: issue || "-",
+            completed,
+          });
+        });
+
+        if (!isAllValid) {
+          return Swal.fire(
+            "Oops!",
+            'Mohon lengkapi Jam, Output, dan centang "Ya, Selesai".',
+            "warning",
+          );
         }
 
-        reports.push({
-            row: div.dataset.row,
-            startTime, endTime, output,
-            issue: div.querySelector(".r-iss").value || "-",
-            completed
+        try {
+          loader("Mengirim Report...");
+
+          const res = await callAPI({
+            action: "submitReport",
+            data: {
+              reports: JSON.stringify(reports),
+              note: "",
+            },
+          });
+
+          Swal.fire({
+            title: "Berhasil",
+            text: res.message,
+            icon: "success",
+            confirmButtonColor: "#f5c451",
+          });
+
+          nav("pageMenu");
+        } catch (err) {
+          Swal.close();
+
+          console.error(err);
+
+          Swal.fire("Error", "Gagal mengirim laporan ke server.", "error");
+        }
+      }
+
+      /* =========================================
+   PASSWORD TOGGLE
+========================================= */
+      function togglePassword() {
+        const input = document.getElementById("p");
+
+        const icon = document.querySelector(".toggle-password i");
+
+        if (input.type === "password") {
+          input.type = "text";
+          icon.className = "bi bi-eye-slash-fill";
+        } else {
+          input.type = "password";
+          icon.className = "bi bi-eye-fill";
+        }
+      }
+
+      /* =========================================
+   DATETIME
+========================================= */
+      function updateDateTime() {
+        const now = new Date();
+
+        const currentDate = now.toLocaleDateString("id-ID", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
         });
-    });
 
-    if (!isAllValid) return Swal.fire("Oops!", "Mohon lengkapi Jam, Output, dan centang Selesai.", "warning");
+        const currentTime = now.toLocaleTimeString("id-ID", {
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
 
-    loader("Mengirim Report...");
-    const res = await callAPI({ action: "submitReport", data: { reports: JSON.stringify(reports), note: "" } });
-    Swal.fire("Berhasil", res.message, "success");
-    nav("pageMenu");
-}
+        const dateEl = document.getElementById("currentDate");
 
-/* =========================================
-   DASHBOARD SPECIFIC (DASHBOARD.HTML)
+        const clockEl = document.getElementById("liveClock");
+
+        if (dateEl) dateEl.innerText = currentDate;
+        if (clockEl) clockEl.innerText = currentTime;
+      }
+
+      updateDateTime();
+      setInterval(updateDateTime, 1000);
+
+      /* =========================================
+   TIMEPICKER
 ========================================= */
-async function loadDashboardProfile() {
-    const dashUser = localStorage.getItem("jef_dashboard_user");
-    if (!dashUser || !document.getElementById("position")) return;
-    
-    let p = await callAPI({ action: "getUserProfile", username: dashUser });
-    document.getElementById("name").innerText = dashUser;
-    document.getElementById("position").innerHTML = "Jabatan : " + (p.position || "-");
-    document.getElementById("division").innerHTML = "Divisi : " + (p.division || "-");
-}
+      function initTimePicker() {
+        document.querySelectorAll(".timepicker").forEach((el) => {
+          if (el._flatpickr) return;
 
-async function loadDashboardTasks() {
-    if (!document.getElementById("taskContainer")) return;
-    const dashUser = localStorage.getItem("jef_dashboard_user");
-    const filterDate = document.getElementById("filterDate").value;
+          flatpickr(el, {
+            enableTime: true,
+            noCalendar: true,
+            dateFormat: "H:i",
+            time_24hr: true,
+            minuteIncrement: 5,
+            disableMobile: true,
+          });
+        });
+      }
 
-    loader("Loading Dashboard...");
-    let tasks = await callAPI({ action: "getDashboardTasks", username: dashUser, date: filterDate });
-    Swal.close();
-
-    const statusFilter = document.getElementById("filterStatus").value;
-    if (statusFilter) tasks = tasks.filter(x => x.status == statusFilter);
-
-    // Stats calculation
-    let done = tasks.filter(x => x.status == "DONE").length;
-    document.getElementById("stats").innerHTML = `<div class='cardx'><div class='row text-center'><div class='col'>📋<h4>${tasks.length}</h4>Total</div><div class='col'>✅<h4>${done}</h4>Done</div><div class='col'>⌛<h4>${tasks.length - done}</h4>Pending</div></div></div>`;
-
-    // Render Tasks
-    let html = "";
-    tasks.forEach(t => {
-        html += `<div class='taskCard'>
-            <h5>${t.task}</h5><small>${t.target}</small>
-            <div class='row mt-3'>
-                <div class='col-6'><input class='form-control start' value='${t.startTime || ""}' placeholder='Mulai'></div>
-                <div class='col-6'><input class='form-control end' value='${t.endTime || ""}' placeholder='Selesai'></div>
-                <div class='col-6 mt-2'><input class='form-control output' value='${t.output || ""}' placeholder='Output'></div>
-                <div class='col-6 mt-2'><input class='form-control issue' value='${t.issue || ""}' placeholder='Kendala'></div>
-            </div>
-            <div class='mt-3 d-flex gap-2'>
-                <button class='btn btn-warning btn-sm' onclick='editTask(${t.row},"${t.task}","${t.target}")'><i class='bi bi-pencil'></i></button>
-                <button class='btn btn-success btn-sm' onclick='saveDetail(${t.row},this)'><i class='bi bi-floppy'></i></button>
-            </div>
-        </div>`;
-    });
-    document.getElementById("taskContainer").innerHTML = html;
-}
-
-async function saveDetail(row, btn) {
-    let card = btn.closest(".taskCard");
-    await callAPI({
-        action: "updateDashboardTask",
-        data: {
-            row: row,
-            startTime: card.querySelector(".start").value,
-            endTime: card.querySelector(".end").value,
-            output: card.querySelector(".output").value,
-            issue: card.querySelector(".issue").value,
-        },
-    });
-    Swal.fire("Berhasil", "Task diperbarui", "success");
-}
-
-/* =========================================
-   UTILS & INITIALIZATION
+      /* =========================================
+   EXIT APP
 ========================================= */
-function togglePassword() {
-    const input = document.getElementById("p");
-    const icon = document.querySelector(".toggle-password i");
-    if (input.type === "password") {
-        input.type = "text";
-        icon.className = "bi bi-eye-slash-fill";
-    } else {
-        input.type = "password";
-        icon.className = "bi bi-eye-fill";
-    }
-}
+      function confirmExit() {
+        Swal.fire({
+          title: "Keluar dari aplikasi?",
+          text: "Kamu harus login kembali nanti.",
+          icon: "warning",
+          showCancelButton: true,
+          confirmButtonColor: "#f5c451",
+          confirmButtonText: "Ya, keluar",
+          cancelButtonText: "Batal",
+        }).then((result) => {
+          if (result.isConfirmed) {
+            localStorage.removeItem("jef_user_logged");
+            localStorage.removeItem("jef_user_name");
 
-function updateDateTime() {
-    const now = new Date();
-    const dateEl = document.getElementById("currentDate");
-    const clockEl = document.getElementById("liveClock");
-    if (dateEl) dateEl.innerText = now.toLocaleDateString("id-ID", { weekday: "long", day: "2-digit", month: "long", year: "numeric" });
-    if (clockEl) clockEl.innerText = now.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-}
+            location.reload();
+          }
+        });
+      }
 
-function initTimePicker() {
-    document.querySelectorAll(".timepicker").forEach((el) => {
-        if (!el._flatpickr) flatpickr(el, { enableTime: true, noCalendar: true, dateFormat: "H:i", time_24hr: true, disableMobile: true });
-    });
-}
+      /* =========================================
+   AUTO LOGIN
+========================================= */
+      window.onload = function () {
+        const savedUser = localStorage.getItem("jef_user_logged");
 
-function openDashboard() {
-    localStorage.setItem("jef_dashboard_user", user);
-    window.location.href = "./dashboard.html";
-}
+        const savedName = localStorage.getItem("jef_user_name");
 
-// Global Init
-window.onload = function () {
-    // Clock
-    updateDateTime();
-    setInterval(updateDateTime, 1000);
+        if (savedUser && savedName) {
+          user = savedUser;
 
-    // Auto Login Check (Index)
-    const savedUser = localStorage.getItem("jef_user_logged");
-    const savedName = localStorage.getItem("jef_user_name");
-    if (savedUser && savedName && document.getElementById("userLabel")) {
-        user = savedUser;
-        document.getElementById("userLabel").innerText = savedName;
-        nav("pageMenu");
-    }
+          document.getElementById("userLabel").innerText = savedName;
 
-    // Dashboard Init (jika di halaman dashboard)
-    if (document.getElementById("taskContainer")) {
-        loadDashboardProfile();
-        loadDashboardTasks();
-    }
-};
+          nav("pageMenu");
+
+          Swal.close();
+        }
+      };
+
+      /* =========================================
+   SERVICE WORKER
+========================================= */
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("/sw.js")
+
+            .then((reg) => {
+              console.log("SW Registered!", reg);
+            })
+
+            .catch((err) => {
+              console.log("SW Registration failed:", err);
+            });
+        });
+      }
+
+      /* =========================================
+   PWA INSTALL
+========================================= */
+      window.addEventListener("beforeinstallprompt", (e) => {
+        e.preventDefault();
+
+        deferredPrompt = e;
+
+        const installBtn = document.getElementById("installBtn");
+
+        if (installBtn) {
+          installBtn.style.display = "block";
+        }
+
+        if (localStorage.getItem("jef_user_logged")) {
+          setTimeout(() => {
+            const modal = document.getElementById("pwaInstallModal");
+
+            if (modal) {
+              modal.style.display = "flex";
+            }
+          }, 3000);
+        }
+      });
+
+      async function triggerInstall() {
+        if (!deferredPrompt) return;
+
+        deferredPrompt.prompt();
+
+        const { outcome } = await deferredPrompt.userChoice;
+
+        if (outcome === "accepted") {
+          document.getElementById("installBtn").style.display = "none";
+        }
+
+        deferredPrompt = null;
+      }
+
+      async function executePwaInstall() {
+        if (!deferredPrompt) return;
+
+        closePwaModal();
+
+        deferredPrompt.prompt();
+
+        const { outcome } = await deferredPrompt.userChoice;
+
+        console.log("Install result:", outcome);
+
+        deferredPrompt = null;
+      }
+
+      function closePwaModal() {
+        const modal = document.getElementById("pwaInstallModal");
+
+        if (modal) {
+          modal.style.display = "none";
+        }
+      }
+
+      window.addEventListener("appinstalled", () => {
+        console.log("PWA Installed");
+
+        closePwaModal();
+      });
+
+      function openDashboard() {
+        localStorage.setItem("jef_dashboard_user", user);
+
+        window.location.href = "./dashboard.html";
+      }
