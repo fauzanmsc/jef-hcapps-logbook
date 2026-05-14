@@ -175,6 +175,7 @@
       }
 
       .btn-jef:hover {
+        background: linear-gradient(236deg, #fffdf7, #ffd87d);
         transform: translateY(-2px);
         /* Efek Glow: Shadow diperluas dan intensitas warna ditingkatkan */
         box-shadow:

@@ -260,7 +260,7 @@ async function showReport() {
         // Header Dashboard Sederhana
         let h = `
             <div class="dashboard-header mb-4 px-2 text-center">
-                <h6 class="text-muted ">Ada ${tasks.length} tugas yang perlu dilaporkan.</h6>
+                <h6 class="text-muted ">Ada <span style="font-weight: bold; color: #f5c451;">${tasks.length} tugas</span> yang perlu dilaporkan.</h6>
             </div>
         `;
 
@@ -272,7 +272,7 @@ async function showReport() {
                 
                 <!-- Card Header -->
                 <div class="p-3 d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.03);">
-                    <span class="badge rounded-pill px-3 py-2" style="background: #f5c451; color: #000;">Tugas #${i + 1}</span>
+                    <span class="badge rounded-pill px-3 py-2" style="background: #f5c451; color: #000;">Tugas ke-${i + 1}</span>
                     <i class="bi bi-clipboard-check text-muted"></i>
                 </div>
 
