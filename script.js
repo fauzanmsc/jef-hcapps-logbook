@@ -215,7 +215,7 @@ async function submitPlan() {
   });
 
   if (tasks.length === 0)
-    return Swal.fire("Oops!", "Setidaknya harus ada 1 tugas.", "warning");
+    return Swal.fire("Oops!", "Setidaknya harus ada 1 task.", "warning");
 
   try {
     loader("Sedang menyimpan task...");
@@ -238,12 +238,12 @@ async function submitPlan() {
 
 // async function showReport() {
 //     try {
-//         loader("Memeriksa tugas aktif...");
+//         loader("Memeriksa task...");
 //         const tasks = await callAPI({ action: "getActiveTasks", username: user });
 //         Swal.close();
 
 //         if (!tasks || tasks.length === 0) {
-//             return Swal.fire({ title: "Tugas Tidak Ditemukan", text: "Tidak ada tugas aktif saat ini.", icon: "info" });
+//             return Swal.fire({ title: "Task Tidak Ditemukan", text: "Tidak ada task aktif saat ini.", icon: "info" });
 //         }
 
 //         let h = "";
@@ -271,14 +271,14 @@ async function submitPlan() {
 
 async function showReport() {
   try {
-    loader("Memeriksa tugas aktif...");
+    loader("Memeriksa task aktif...");
     const tasks = await callAPI({ action: "getActiveTasks", username: user });
     Swal.close();
 
     if (!tasks || tasks.length === 0) {
       return Swal.fire({
-        title: "Tugas Tidak Ditemukan",
-        text: "Tidak ada tugas aktif saat ini.",
+        title: "Task Tidak Ditemukan",
+        text: "Tidak ada task aktif saat ini.",
         icon: "info",
         confirmButtonColor: "#3085d6",
       });
@@ -287,7 +287,7 @@ async function showReport() {
     // Header Dashboard Sederhana
     let h = `
             <div class="dashboard-header mb-4 px-2 text-center">
-                <h6 class="text-muted ">Ada <span style="font-weight: bold; color: #f5c451;">${tasks.length} tugas</span> yang perlu dilaporkan.</h6>
+                <h6 class="text-muted ">Ada <span style="font-weight: bold; color: #f5c451;">${tasks.length} task</span> yang perlu dilaporkan.</h6>
             </div>
         `;
 
@@ -299,7 +299,7 @@ async function showReport() {
                 
                 <!-- Card Header -->
                 <div class="p-3 d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.03);">
-                    <span class="badge rounded-pill px-3 py-2" style="background: #f5c451; color: #000;">Tugas ke-${i + 1}</span>
+                    <span class="badge rounded-pill px-3 py-2" style="background: #f5c451; color: #000;">Task ke-${i + 1}</span>
                     <i class="bi bi-clipboard-check text-muted"></i>
                 </div>
 
@@ -400,7 +400,7 @@ async function finalReport() {
   if (!isAllValid) {
     return Swal.fire(
       "Oops!",
-      "Mohon lengkapi Jam Mulai, Selesai, dan Output Hasil pada setiap tugas.",
+      "Mohon lengkapi Jam Mulai, Selesai, dan Output Hasil pada setiap task.",
       "warning",
     );
   }
