@@ -293,9 +293,15 @@
       }
 
 
-      .form-control .timepicker {
-        
-      }
+      button#installBtn {
+    padding: 5px;
+    font-size: 14px;
+    background: linear-gradient(135deg, #fff9ec, #a4bfcb);
+}
+
+.menu-item .daily-logbook{
+
+}
 
       .time-box {
         display: flex;
