@@ -105,6 +105,7 @@ function updateDateTime() {
 
 function initTimePicker() {
   document.querySelectorAll(".timepicker").forEach((el) => {
+    if (el.type === "time") return;
     if (el._flatpickr) return;
     flatpickr(el, {
       enableTime: true,
@@ -145,7 +146,6 @@ async function doLogin() {
 
       Swal.fire({
         title: "Login Berhasil",
-        text: "Selamat datang, " + res.name,
         icon: "success",
         timer: 1500,
         showConfirmButton: false,
@@ -314,30 +314,23 @@ async function showReport() {
                     </div>
 
                     <!-- Input Grid -->
-                    <div class="row g-3">
+                    <div class="row g-3 align-items-end">
                         <div class="col-6">
-                            <label class="form-label small text-uppercase fw-bold text-muted">Mulai</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-play"></i></span>
-                                <input type="text" class="form-control timepicker r-start input-group-text bg-dark border-secondary text-muted" placeholder="00:00">
-                            </div>
+                            <label class="form-label small text-uppercase fw-bold text-muted mb-1">Mulai</label>
+                            <input type="time" class="form-control timepicker r-start" placeholder="00:00" min="00:00" max="23:59">
                         </div>
                         <div class="col-6">
-                            <label class="form-label small text-uppercase fw-bold text-muted">Selesai</label>
-                            <div class="input-group">
-                                <span class="input-group-text bg-dark border-secondary text-muted"><i class="bi bi-stop"></i></span>
-                                <input type="text" class="form-control timepicker r-end input-group-text bg-dark border-secondary text-muted" placeholder="00:00">
-                            </div>
+                            <label class="form-label small text-uppercase fw-bold text-muted mb-1">Selesai</label>
+                            <input type="time" class="form-control timepicker r-end" placeholder="00:00" min="00:00" max="23:59">
                         </div>
-                        
                         <div class="col-12">
                             <label class="form-label small text-uppercase fw-bold text-muted">Output Hasil</label>
-                            <textarea class="form-control bg-dark text-white border-secondary r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?"></textarea>
+                            <textarea class="form-control r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?"></textarea>
                         </div>
 
                         <div class="col-12">
                             <label class="form-label small text-uppercase fw-bold text-muted">Kendala (Opsional)</label>
-                            <input type="text" class="form-control bg-dark text-white border-secondary r-iss" placeholder="Ada hambatan?">
+                            <input type="text" class="form-control r-iss" placeholder="Ada hambatan?">
                         </div>
 
                         <!-- Completion Status -->
@@ -664,12 +657,10 @@ window.addEventListener("beforeinstallprompt", (e) => {
   deferredPrompt = e;
   const installBtn = document.getElementById("installBtn");
   if (installBtn) installBtn.style.display = "block";
-  if (localStorage.getItem("jef_user_logged")) {
-    setTimeout(() => {
-      const modal = document.getElementById("pwaInstallModal");
-      if (modal) modal.style.display = "flex";
-    }, 3000);
-  }
+  setTimeout(() => {
+    const modal = document.getElementById("pwaInstallModal");
+    if (modal) modal.style.display = "flex";
+  }, 3000);
 });
 
 async function triggerInstall() {
@@ -750,12 +741,12 @@ function renderDashboard() {
         <div class='row mt-3'>
 
         <div class='col-md-6'>
-        <input class='form-control start'
+        <input type='time' class='form-control start' min='00:00' max='23:59'
         value='${t.startTime || ""}'>
         </div>
 
         <div class='col-md-6'>
-        <input class='form-control end'
+        <input type='time' class='form-control end' min='00:00' max='23:59'
         value='${t.endTime || ""}'>
         </div>
 
