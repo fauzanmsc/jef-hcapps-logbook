@@ -15,42 +15,86 @@
     <style>
       body {
         background: #0f0f0f;
-        color: white;
+        color: #fff;
         padding: 20px;
       }
       .cardx {
         background: #171717;
+        border-radius: 25px;
         padding: 20px;
-        border-radius: 20px;
         margin-bottom: 15px;
-        border: 1px solid #333;
+        border: 1px solid #292929;
+      }
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .avatar {
+        width: 70px;
+        height: 70px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #f5c451, #d8a52c);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 30px;
+        color: black;
+        font-weight: bold;
+      }
+      .taskCard {
+        background: #1f1f1f;
+        border-radius: 20px;
+        padding: 20px;
+        margin-top: 15px;
+        border-left: 4px solid #f5c451;
       }
       .btn-jef {
         background: linear-gradient(135deg, #f5c451, #d8a52c);
-        font-weight: bold;
         border: none;
+        font-weight: bold;
       }
-      .task {
-        background: #222;
-        padding: 15px;
-        border-radius: 15px;
-        margin-top: 10px;
+      .badgeDone {
+        background: #25d583;
+      }
+      .badgePending {
+        background: #666;
+      }
+      input,
+      select,
+      textarea {
+        background: #262626 !important;
+        color: white !important;
+        border: 1px solid #444 !important;
       }
     </style>
   </head>
   <body>
-    <div class="container" style="max-width: 700px">
+    <div class="container" style="max-width: 900px">
       <div class="cardx">
-        <h3>📊 Dashboard Task</h3>
-        <div id="username"></div>
+        <div class="profile">
+          <div class="avatar"><i class="bi bi-person"></i></div>
+          <div>
+            <h4 id="name">User</h4>
+            <div id="position"></div>
+            <div id="division"></div>
+          </div>
+        </div>
       </div>
 
       <div class="cardx">
-        <div class="row">
-          <div class="col-8">
-            <input id="filterDate" type="date" class="form-control" />
+        <div class="row g-2">
+          <div class="col-md-4">
+            <input type="date" id="filterDate" class="form-control" />
           </div>
-          <div class="col-4">
+          <div class="col-md-4">
+            <select id="filterStatus" class="form-select">
+              <option value="">Semua Status</option>
+              <option value="DONE">DONE</option>
+              <option value="PENDING">PENDING</option>
+            </select>
+          </div>
+          <div class="col-md-4">
             <button class="btn btn-jef w-100" onclick="loadTasks()">
               Filter
             </button>
@@ -58,29 +102,13 @@
         </div>
       </div>
 
-      <div class="cardx">
-        <button class="btn btn-jef w-100" onclick="addTaskModal()">
-          + Tambah Task
-        </button>
-      </div>
-
       <div id="stats"></div>
       <div id="taskContainer"></div>
-
-      <div class="mt-3">
-        <button
-          class="btn btn-secondary w-100"
-          onclick="window.location = './index.html'"
-        >
-          Kembali
-        </button>
-      </div>
     </div>
 
     <script>
-      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbpJQas3xphkwdMC-JF_vBmmkSzo24QH3UefteN1HAr7Up0mwNjON1QW5gUZNDNjlJVw/exec"; //Ubah
+      const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwbpJQas3xphkwdMC-JF_vBmmkSzo24QH3UefteN1HAr7Up0mwNjON1QW5gUZNDNjlJVw/exec"; //ubah
       const user = localStorage.getItem("jef_dashboard_user");
-      document.getElementById("username").innerHTML = "User : " + user;
 
       async function callAPI(payload) {
         const res = await fetch(WEB_APP_URL, {
@@ -91,93 +119,109 @@
         return await res.json();
       }
 
+      async function loadProfile() {
+        let p = await callAPI({ action: "getUserProfile", username: user });
+        document.getElementById("name").innerText = user;
+        document.getElementById("position").innerHTML =
+          "Jabatan : " + (p.position || "-");
+        document.getElementById("division").innerHTML =
+          "Divisi : " + (p.division || "-");
+      }
+
       async function loadTasks() {
         Swal.fire({ title: "Loading...", didOpen: () => Swal.showLoading() });
-        const date = document.getElementById("filterDate").value;
-        const data = await callAPI({
+        let tasks = await callAPI({
           action: "getDashboardTasks",
           username: user,
-          date,
+          date: filterDate.value,
         });
         Swal.close();
 
-        let done = 0;
-        let pending = 0;
-        let html = "";
+        let status = filterStatus.value;
+        if (status) {
+          tasks = tasks.filter((x) => x.status == status);
+        }
 
-        data.forEach((x) => {
-          if (x.status === "DONE") done++;
-          else pending++;
-          html += `
-<div class='task'>
-<div class='d-flex justify-content-between'>
-<b>${x.task}</b>
-<span>${x.status}</span>
-</div>
-<small>${x.target}</small>
-<div class='mt-3 d-flex gap-2'>
-<button class='btn btn-warning btn-sm' onclick='editTask(${x.row},"${x.task}","${x.target}")'>Edit</button>
-<button class='btn btn-danger btn-sm' onclick='deleteTask(${x.row})'>Delete</button>
-</div>
-</div>`;
-        });
+        let done = tasks.filter((x) => x.status == "DONE").length;
+        let pending = tasks.filter((x) => x.status != "DONE").length;
 
         document.getElementById("stats").innerHTML = `
 <div class='cardx'>
-Total:${data.length}<br>
-Done:${done}<br>
-Pending:${pending}
+<div class='row text-center'>
+<div class='col'>📋<h4>${tasks.length}</h4>Total</div>
+<div class='col'>✅<h4>${done}</h4>Done</div>
+<div class='col'>⌛<h4>${pending}</h4>Pending</div>
+</div></div>`;
+
+        let html = "";
+
+        for (let t of tasks) {
+          html += `
+<div class='taskCard'>
+<div class='d-flex justify-content-between'>
+<div>
+<h5>${t.task}</h5>
+<small>${t.target}</small>
+</div>
+<span class='badge ${t.status == "DONE" ? "badgeDone" : "badgePending"}'>${t.status}</span>
+</div>
+
+<div class='row mt-3'>
+<div class='col-md-6'><input class='form-control start' placeholder='Jam Mulai'></div>
+<div class='col-md-6'><input class='form-control end' placeholder='Jam Selesai'></div>
+<div class='col-md-6 mt-2'><input class='form-control output' placeholder='Output'></div>
+<div class='col-md-6 mt-2'><input class='form-control issue' placeholder='Kendala'></div>
+</div>
+
+<div class='mt-3 d-flex gap-2'>
+<button class='btn btn-warning btn-sm' onclick='editTask(${t.row},"${t.task}","${t.target}")'><i class='bi bi-pencil'></i></button>
+<button class='btn btn-danger btn-sm' onclick='deleteTask(${t.row})'><i class='bi bi-trash'></i></button>
+<button class='btn btn-success btn-sm' onclick='saveDetail(${t.row},this)'><i class='bi bi-floppy'></i> Simpan</button>
+</div>
 </div>`;
+        }
 
         document.getElementById("taskContainer").innerHTML = html;
       }
 
-      async function addTaskModal() {
-        const p = await Swal.fire({
-          title: "Tambah Task",
-          html: `<input id=t1 class=form-control placeholder='Task'><br><input id=t2 class=form-control placeholder='Target'>`,
-          showCancelButton: true,
-          preConfirm: () => ({ task: t1.value, target: t2.value }),
-        });
-        if (!p.value) return;
-
+      async function saveDetail(row, btn) {
+        let card = btn.closest(".taskCard");
         await callAPI({
-          action: "addTaskDashboard",
+          action: "updateDashboardTask",
           data: {
-            date: new Date().toISOString().split("T")[0],
-            username: user,
-            position: "-",
-            division: "-",
-            task: p.value.task,
-            target: p.value.target,
+            row: row,
+            startTime: card.querySelector(".start").value,
+            endTime: card.querySelector(".end").value,
+            output: card.querySelector(".output").value,
+            issue: card.querySelector(".issue").value,
           },
         });
-        loadTasks();
+        Swal.fire("Berhasil", "Task diperbarui", "success");
       }
 
       async function editTask(row, task, target) {
         const p = await Swal.fire({
           title: "Edit Task",
-          html: `<input id=t1 value='${task}' class=form-control><br><input id=t2 value='${target}' class=form-control>`,
+          html: `<input id=t1 value='${task}' class='form-control'><br><input id=t2 value='${target}' class='form-control'>`,
           showCancelButton: true,
           preConfirm: () => ({ task: t1.value, target: t2.value }),
         });
         if (!p.value) return;
-
         await callAPI({
           action: "updateTask",
-          data: { row, task: p.value.task, target: p.value.target },
+          data: { row: row, task: p.value.task, target: p.value.target },
         });
         loadTasks();
       }
 
       async function deleteTask(row) {
-        const x = await Swal.fire({ title: "Hapus?", showCancelButton: true });
+        let x = await Swal.fire({ title: "Hapus?", showCancelButton: true });
         if (!x.isConfirmed) return;
         await callAPI({ action: "deleteTask", row });
         loadTasks();
       }
 
+      loadProfile();
       loadTasks();
     </script>
   </body>
