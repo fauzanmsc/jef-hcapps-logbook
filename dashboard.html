@@ -653,7 +653,7 @@
           <div class="filter-section">
             <input type="date" id="filterDate" class="form-control" />
             <select id="filterStatus" class="form-select" title="Pilih status task">
-              <option value="">Status</option>
+              <option value="">All</option>
               <option value="DONE"><i class="bi bi-check-circle-fill"></i> Selesai</option>
               <option value="PENDING"><i class="bi bi-clock-history"></i> Belum</option>
             </select>
@@ -777,7 +777,7 @@
             <div class="stat-card">
               <i class="bi bi-hourglass-split"></i>
               <h5>${pending}</h5>
-              <small>Pending</small>
+              <small>Belum</small>
             </div>
           </div>
         `;
@@ -803,7 +803,7 @@
                   </div>
                   <button class="status-badge ${t.status === "DONE" ? "done" : "pending"}" onclick="toggleStatus(${t.row})" title="Click to toggle">
                     <i class="bi ${t.status === "DONE" ? "bi-check-circle-fill" : "bi bi-dash-circle-fill"}"></i>
-                    ${t.status === "DONE" ? "DONE" : "BELUM"}
+                    ${t.status === "DONE" ? "SELESAI" : "BELUM"}
                   </button>
                 </div>
 
