@@ -471,7 +471,7 @@ async function loadDashboardTasks() {
 }
 
 function saveDetail(row, btn) {
-  let card = btn.closest(".taskCard");
+  let card = btn.closest(".task-card");
 
   const data = {
     row: row,

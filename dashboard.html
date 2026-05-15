@@ -386,7 +386,7 @@
 
       .task-actions {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 1fr 1fr;
         gap: 8px;
         margin-top: 14px;
         padding-top: 12px;
@@ -427,6 +427,17 @@
       .btn-delete:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 16px rgba(231, 76, 60, 0.3);
+      }
+
+      .btn-update {
+        background: linear-gradient(135deg, #2f6ee4, #219fe6);
+        color: white;
+        box-shadow: 0 4px 12px rgba(39, 174, 96, 0.2);
+      }
+
+      .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(39, 174, 96, 0.3);
       }
 
 
@@ -604,7 +615,7 @@
         <div class="header-card">
           <div class="dashboard-header">
             <div class="dashboard-avatar">
-              <img id="avatarImg" src="/images/gif/animate.gif" alt="Profile"/>
+              <img id="avatarImg" src="/images/png/profile.png" alt="Profile"/>
             </div>
             <div class="dashboard-info">
               <h3 id="name">User</h3>
@@ -698,6 +709,12 @@
         } else {
           pendingChanges.update.push(updateData);
         }
+
+        // Save immediately to datasheet
+        callAPI({
+          action: "updateTask",
+          data: updateData
+        }).catch(err => console.error("Failed to save status:", err));
 
         renderDashboard();
       }
@@ -803,6 +820,9 @@
                   </button>
                   <button class="btn-delete" onclick="deleteTask(${t.row})" title="Delete task">
                     <i class="bi bi-trash3"></i> Hapus
+                  </button>
+                  <button class="btn-update" onclick="saveDetail(${t.row}, this)" title="Save changes">
+                    <i class="bi bi-check-lg"></i> Update
                   </button>
                 </div>
               </div>
