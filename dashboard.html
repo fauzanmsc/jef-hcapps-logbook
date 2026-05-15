@@ -133,7 +133,7 @@
         display: grid;
         grid-template-columns: 1fr 1fr 50px;
         gap: 10px;
-        margin-bottom: 10px;
+
       }
 
       .filter-section input {
@@ -144,6 +144,7 @@
         color: white !important;
         font-size: 0.9rem !important;
         transition: all 0.3s ease;
+        max-width: 140px;
       }
 
       .filter-section input:focus {
@@ -292,7 +293,6 @@
         color: #a0a0a0;
         display: flex;
         align-items: center;
-        gap: 6px;
       }
 
       .status-badge {
@@ -637,9 +637,9 @@
           <div class="filter-section">
             <input type="date" id="filterDate" class="form-control" />
             <select id="filterStatus" class="form-select" title="Pilih status task">
-              <option value="">Semua Status</option>
-              <option value="DONE">✓ DONE - Selesai</option>
-              <option value="PENDING">⏳ PENDING - Menunggu</option>
+              <option value="">Status</option>
+              <option value="DONE"><i class="bi bi-check-circle-fill"></i> Selesai</option>
+              <option value="PENDING"><i class="bi bi-clock-history"></i> Belum</option>
             </select>
             <button class="btn filter-btn" onclick="loadDashboardTasks()" title="Filter">
               <i class="bi bi-search"></i>
@@ -786,8 +786,8 @@
                     </div>
                   </div>
                   <button class="status-badge ${t.status === "DONE" ? "done" : "pending"}" onclick="toggleStatus(${t.row})" title="Click to toggle">
-                    <i class="bi ${t.status === "DONE" ? "bi-check-circle-fill" : "bi-clock-history"}"></i>
-                    ${t.status}
+                    <i class="bi ${t.status === "DONE" ? "bi-check-circle-fill" : "bi bi-dash-circle-fill"}"></i>
+                    ${t.status === "DONE" ? "DONE" : "BELUM"}
                   </button>
                 </div>
 
@@ -822,7 +822,7 @@
                     <i class="bi bi-trash3"></i> Hapus
                   </button>
                   <button class="btn-update" onclick="saveDetail(${t.row}, this)" title="Save changes">
-                    <i class="bi bi-check-lg"></i> Update
+                    <i class="bi bi-box-arrow-in-up"></i> Update
                   </button>
                 </div>
               </div>
