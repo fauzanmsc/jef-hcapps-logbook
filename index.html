@@ -285,27 +285,33 @@
 
           <div id="planContainer">
             <!-- Default Field (Tidak bisa dihapus) -->
-            <div class="row g-2 mb-2 task-row">
-              <div class="col-5">
-                <input
-                  type="text"
-                  class="form-control tn shadow-sm"
-                  placeholder="Isi task / activity"
-                />
-              </div>
+            <div class="task-row mb-3">
+              <div class="row g-2 mb-2">
+                <div class="col-5">
+                  <label class="small fw-semibold mb-2 d-block">Task / Aktivitas <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control tn shadow-sm"
+                    placeholder="Isi task / activity"
+                    required
+                  />
+                </div>
 
-              <div class="col-5">
-                <input
-                  type="text"
-                  class="form-control tt shadow-sm"
-                  placeholder="Isi target dari task"
-                />
-              </div>
+                <div class="col-5">
+                  <label class="small fw-semibold mb-2 d-block">Target Task <span class="text-danger">*</span></label>
+                  <input
+                    type="text"
+                    class="form-control tt shadow-sm"
+                    placeholder="Isi target dari task"
+                    required
+                  />
+                </div>
 
-              <div class="col-2">
-                <button type="button" class="btn btn-dark w-100 h-100" disabled>
-                  <i class="bi bi-dash-lg"></i>
-                </button>
+                <div class="col-2 d-flex align-items-end">
+                  <button type="button" class="btn btn-dark w-100 h-100" disabled>
+                    <i class="bi bi-dash-lg"></i>
+                  </button>
+                </div>
               </div>
             </div>
           </div>

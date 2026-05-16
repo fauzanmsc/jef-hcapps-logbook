@@ -184,12 +184,34 @@ async function showPlan() {
   }
 }
 
+function toggleOutputType(radio, index) {
+  const reportCard = radio.closest(".report-card");
+  const textInput = reportCard.querySelector(".r-out-text");
+  const imageInput = reportCard.querySelector(".r-out-image");
+  
+  if (radio.value === "text") {
+    textInput.style.display = "block";
+    textInput.parentElement.style.display = "block";
+    imageInput.style.display = "none";
+    imageInput.parentElement.style.display = "none";
+    imageInput.value = "";
+  } else {
+    textInput.style.display = "none";
+    textInput.parentElement.style.display = "none";
+    imageInput.style.display = "block";
+    imageInput.parentElement.style.display = "block";
+    textInput.value = "";
+  }
+}
+
 function addPlanField() {
   const html = `
-    <div class="row g-2 mb-2 task-row">
-      <div class="col-5"><input type="text" class="form-control tn shadow-sm" placeholder="Isi task / activity"></div>
-      <div class="col-5"><input type="text" class="form-control tt shadow-sm" placeholder="Isi target dari task"></div>
-      <div class="col-2"><button type="button" class="btn btn-outline-secondary w-100 h-100" onclick="removeTask(this)"><i class="bi bi-trash3-fill"></i></button></div>
+    <div class="task-row mb-3">
+      <div class="row g-2 mb-2">
+        <div class="col-5"><label class="small fw-semibold mb-2 d-block">Task / Aktivitas <span class="text-danger">*</span></label><input type="text" class="form-control tn shadow-sm" placeholder="Isi task / activity" required></div>
+        <div class="col-5"><label class="small fw-semibold mb-2 d-block">Target Task <span class="text-danger">*</span></label><input type="text" class="form-control tt shadow-sm" placeholder="Isi target dari task" required></div>
+        <div class="col-2 d-flex align-items-end"><button type="button" class="btn btn-dark w-100 h-100" onclick="removeTask(this)"><i class="bi bi-trash3-fill"></i></button></div>
+      </div>
     </div>`;
   document
     .getElementById("planContainer")
@@ -205,14 +227,28 @@ function removeTask(button) {
 
 async function submitPlan() {
   let tasks = [];
+  let hasError = false;
+
   document.querySelectorAll(".tn").forEach((el, i) => {
-    if (el.value.trim()) {
+    const taskName = el.value.trim();
+    const taskTarget = document.querySelectorAll(".tt")[i].value.trim();
+
+    if (taskName || taskTarget) {
+      // Jika salah satu ada isi, keduanya wajib diisi
+      if (!taskName || !taskTarget) {
+        hasError = true;
+        return;
+      }
       tasks.push({
-        name: el.value.trim(),
-        target: document.querySelectorAll(".tt")[i].value.trim(),
+        name: taskName,
+        target: taskTarget,
       });
     }
   });
+
+  if (hasError) {
+    return Swal.fire("Oops!", "Task dan Target wajib diisi bersama-sama.", "warning");
+  }
 
   if (tasks.length === 0)
     return Swal.fire("Oops!", "Setidaknya harus ada 1 task.", "warning");
@@ -325,9 +361,28 @@ async function showReport() {
                             <label class="form-label small text-uppercase fw-bold text-muted mb-1">Selesai*</label>
                             <input type="time" class="form-control timepicker r-end" placeholder="00:00" min="00:00" max="23:59">
                         </div>
+                        <!-- Output Type Selection -->
                         <div class="col-12">
-                            <label class="form-label small text-uppercase fw-bold text-muted">Output / Hasil*</label>
-                            <textarea class="form-control r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?"></textarea>
+                            <label class="form-label small text-uppercase fw-bold text-muted mb-2">Output / Hasil* <span style="font-size: 0.75rem;">(Pilih satu)</span></label>
+                            <div class="btn-group w-100 mb-2" role="group">
+                                <input type="radio" class="btn-check output-type-radio" name="output-type-${i}" id="text-${i}" value="text" checked onchange="toggleOutputType(this, ${i})">
+                                <label class="btn btn-outline-secondary btn-sm" for="text-${i}">
+                                    <i class="bi bi-chat-left-text"></i> Caption Text
+                                </label>
+                                
+                                <input type="radio" class="btn-check output-type-radio" name="output-type-${i}" id="image-${i}" value="image" onchange="toggleOutputType(this, ${i})">
+                                <label class="btn btn-outline-secondary btn-sm" for="image-${i}">
+                                    <i class="bi bi-image"></i> Gambar/Link
+                                </label>
+                            </div>
+                            
+                            <!-- Text Input -->
+                            <textarea class="form-control r-out-text r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?" style="display: block;"></textarea>
+                            
+                            <!-- Image/Link Input -->
+                            <div style="display: none;">
+                                <input type="url" class="form-control r-out-image r-out" placeholder="Paste URL gambar atau link hasil" style="display: none;">
+                            </div>
                         </div>
 
                         <div class="col-12">
@@ -370,11 +425,12 @@ async function finalReport() {
   reportItems.forEach((div) => {
     const startTime = div.querySelector(".r-start").value.trim();
     const endTime = div.querySelector(".r-end").value.trim();
-    const output = div.querySelector(".r-out").value.trim();
+    const outText = div.querySelector(".r-out-text").value.trim();
+    const outImage = div.querySelector(".r-out-image").value.trim();
     const completed = div.querySelector(".r-c").checked;
 
-    // PERUBAHAN: Validasi visual. Issue bersifat opsional, jadi tidak masuk validasi wajib.
-    if (!startTime || !endTime || !output) {
+    // Validasi: Waktu dan salah satu output harus diisi
+    if (!startTime || !endTime || (!outText && !outImage)) {
       isAllValid = false;
       div.style.border = "2px solid #ff4d4d"; // Border merah jika kosong
     } else {
@@ -385,7 +441,8 @@ async function finalReport() {
       row: div.dataset.row,
       startTime,
       endTime,
-      output,
+      output: outText || outImage, // Ambil yang ada
+      outputType: outText ? "text" : "image",
       issue: div.querySelector(".r-iss").value || "-",
       completed: completed,
     });
