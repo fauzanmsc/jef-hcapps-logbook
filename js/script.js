@@ -187,21 +187,78 @@ async function showPlan() {
 function toggleOutputType(radio, index) {
   const reportCard = radio.closest(".report-card");
   const textInput = reportCard.querySelector(".r-out-text");
+  const imageWrapper = reportCard.querySelector(".image-input-wrapper");
   const imageInput = reportCard.querySelector(".r-out-image");
   
   if (radio.value === "text") {
     textInput.style.display = "block";
-    textInput.parentElement.style.display = "block";
-    imageInput.style.display = "none";
-    imageInput.parentElement.style.display = "none";
+    imageWrapper.style.display = "none";
     imageInput.value = "";
   } else {
     textInput.style.display = "none";
-    textInput.parentElement.style.display = "none";
-    imageInput.style.display = "block";
-    imageInput.parentElement.style.display = "block";
+    imageWrapper.style.display = "block";
     textInput.value = "";
+    
+    // Tambah event listener untuk validasi file
+    imageInput.addEventListener("change", function() {
+      if (this.files && this.files.length > 0) {
+        const file = this.files[0];
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        
+        if (file.size > maxSize) {
+          Swal.fire("Oops!", "Ukuran file maksimal 2MB. File akan dikompres otomatis.", "warning");
+        }
+      }
+    });
   }
+}
+
+// Convert file to base64
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = (error) => reject(error);
+  });
+}
+
+// Compress image before converting to base64
+function compressImage(file, maxWidth = 800, maxHeight = 600, quality = 0.6) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let width = img.width;
+        let height = img.height;
+
+        // Hitung dimensi baru
+        if (width > height) {
+          if (width > maxWidth) {
+            height *= maxWidth / width;
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width *= maxHeight / height;
+            height = maxHeight;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL("image/jpeg", quality));
+      };
+      img.onerror = () => reject(new Error("Gagal memuat gambar"));
+      img.src = event.target.result;
+    };
+    reader.onerror = () => reject(new Error("Gagal membaca file"));
+  });
 }
 
 function addPlanField() {
@@ -363,26 +420,8 @@ async function showReport() {
                         </div>
                         <!-- Output Type Selection -->
                         <div class="col-12">
-                            <label class="form-label small text-uppercase fw-bold text-muted mb-2">Output / Hasil* <span style="font-size: 0.75rem;">(Pilih satu)</span></label>
-                            <div class="btn-group w-100 mb-2" role="group">
-                                <input type="radio" class="btn-check output-type-radio" name="output-type-${i}" id="text-${i}" value="text" checked onchange="toggleOutputType(this, ${i})">
-                                <label class="btn btn-outline-secondary btn-sm" for="text-${i}">
-                                    <i class="bi bi-chat-left-text"></i> Caption Text
-                                </label>
-                                
-                                <input type="radio" class="btn-check output-type-radio" name="output-type-${i}" id="image-${i}" value="image" onchange="toggleOutputType(this, ${i})">
-                                <label class="btn btn-outline-secondary btn-sm" for="image-${i}">
-                                    <i class="bi bi-image"></i> Gambar/Link
-                                </label>
-                            </div>
-                            
-                            <!-- Text Input -->
-                            <textarea class="form-control r-out-text r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?" style="display: block;"></textarea>
-                            
-                            <!-- Image/Link Input -->
-                            <div style="display: none;">
-                                <input type="url" class="form-control r-out-image r-out" placeholder="Paste URL gambar atau link hasil" style="display: none;">
-                            </div>
+                            <label class="form-label small text-uppercase fw-bold text-muted">Output / Hasil*</label>
+                            <textarea class="form-control r-out" rows="2" placeholder="Apa yang dihasilkan hari ini?"></textarea>
                         </div>
 
                         <div class="col-12">
@@ -417,7 +456,6 @@ async function finalReport() {
   let reports = [];
   let isAllValid = true;
 
-  // PERUBAHAN: Selector diganti dari .report-item menjadi .report-card
   const reportItems = document.querySelectorAll(".report-card");
 
   if (reportItems.length === 0) return;
@@ -425,30 +463,27 @@ async function finalReport() {
   reportItems.forEach((div) => {
     const startTime = div.querySelector(".r-start").value.trim();
     const endTime = div.querySelector(".r-end").value.trim();
-    const outText = div.querySelector(".r-out-text").value.trim();
-    const outImage = div.querySelector(".r-out-image").value.trim();
+    const output = div.querySelector(".r-out").value.trim();
     const completed = div.querySelector(".r-c").checked;
 
-    // Validasi: Waktu dan salah satu output harus diisi
-    if (!startTime || !endTime || (!outText && !outImage)) {
+    // Validasi: Waktu dan output harus diisi
+    if (!startTime || !endTime || !output) {
       isAllValid = false;
-      div.style.border = "2px solid #ff4d4d"; // Border merah jika kosong
+      div.style.border = "2px solid #ff4d4d";
     } else {
-      div.style.border = "1px solid #333"; // Kembalikan ke normal
+      div.style.border = "1px solid #333";
     }
 
     reports.push({
       row: div.dataset.row,
       startTime,
       endTime,
-      output: outText || outImage, // Ambil yang ada
-      outputType: outText ? "text" : "image",
+      output,
       issue: div.querySelector(".r-iss").value || "-",
       completed: completed,
     });
   });
 
-  // PERUBAHAN: Pesan peringatan lebih jelas
   if (!isAllValid) {
     return Swal.fire(
       "Oops!",
@@ -459,7 +494,6 @@ async function finalReport() {
 
   try {
     loader("Mengirim Report...");
-    // Mengirim data ke action "submitReport"
     const res = await callAPI({
       action: "submitReport",
       data: {
