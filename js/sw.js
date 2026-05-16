@@ -1,4 +1,4 @@
-const CACHE_NAME = 'jef-v2';
+const CACHE_NAME = 'jef-v3';
 const assets = [
   '/',
   '/index.html',
